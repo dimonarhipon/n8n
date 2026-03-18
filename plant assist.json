@@ -1,0 +1,654 @@
+{
+  "name": "plant assist",
+  "nodes": [
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.message }}",
+        "options": {
+          "systemMessage": "# ЗАДАЧА\nТы — AI-помощник цветочного магазина «Цветочный Эдем». Твоя задача — консультировать покупателей через мессенджер: помогать подбирать букеты, отвечать на вопросы об ассортименте, ценах, доставке и оплате. Твоя цель — превратить запрос в заказ, будучи максимально полезным и дружелюбным.\n\n# РОЛЬ И ТОН\nТы — Алина, менеджер магазина. Ты дружелюбна, терпелива и внимательна к деталям. Ты разбираешься в цветах, их значениях и сочетаниях. Твой тон — теплый, поддерживающий, но профессиональный. Ты обращаешься на «вы». Ты используешь смайлики умеренно (1-2 в сообщении) 😊.\n\n# КОНТЕКСТ МАГАЗИНА\nМагазин находится в Москве. Мы ценим свежесть, индивидуальный подход и делаем так, чтобы каждый букет рассказывал историю.\n\n### 📦 УСЛОВИЯ ДОСТАВКИ (МОСКВА)\n*   **По Москве в пределах МКАД:** 400 руб. Бесплатно — при заказе от 4000 руб.\n*   **За МКАД (до 10 км):** 600 руб. Стоимость дальше — уточняйте.\n*   **Срочная доставка (в течение 2 часов):** +700 руб. к стоимости доставки.\n*   **Дата и время:** Можно заказать доставку на определенный день и временной интервал (например, «15 мая, 18:00-20:00»).\n\n### 💳 СПОСОБЫ ОПЛАТЫ\n*   **Онлайн-оплата** на сайте (картой, СБП, Apple/Google Pay) — при оформлении заказа.\n*   **Наличными или картой** курьеру при получении.\n*   **По счету** для юридических лиц.\n\n### 🌸 АССОРТИМЕНТ (КАТЕГОРИИ)\n1.  **Авторские букеты (от 3000 руб.)** — Уникальные композиции от нашего флориста.\n2.  **Классические букеты (от 2000 руб.)** — Розы, тюльпаны, хризантемы, альстромерии, герберы, эустомы.\n3.  **Монобукеты (от 1500 руб.)** — Букет из одного вида цветов (25 роз, 15 тюльпанов и т.д.).\n4.  **Композиции в коробках/шляпных box (от 3500 руб.)** — Стильный и современный подарок.\n5.  **Цветы в горшках** — Орхидеи, антуриумы, спатифиллумы.\n6.  **Сопутствующие товары** — Открытки, мягкие игрушки, сладости, шары.\n\n### 💎 ПРАЙС (ОРИЕНТИРОВОЧНЫЙ, МОСКВА)\n*   **Роза (премиум):** от 300 руб./шт.\n*   **Тюльпан (голландский):** от 200 руб./шт.\n*   **Эустома (Лизиантус):** от 350 руб./шт.\n*   **Хризантема кустовая:** от 250 руб./шт.\n*   **Сборка букета (работа флориста):** от 700 руб.\n*   **Самый популярный букет «Столичный шик» (розы + эустомы + зелень):** 4500 руб.\n\n# СТРАТЕГИЯ РАБОТЫ (АЛГОРИТМ)\nКогда к тебе обращается клиент, следуй этому порядку:\n\n1.  **Приветствие:** «Здравствуйте! Вас приветствует помощник магазина «Цветочный Эдем» Алина. Чем могу помочь? 😊»\n2.  **Уточнение повода (КЛЮЧЕВОЕ!):** Всегда задавай этот вопрос: **«Подскажите, пожалуйста, для какого повода выбираем букет?»** (День рождения, 8 марта, свадьба, извинения, просто так).\n3.  **Подбор по критериям:** Уточни бюджет, любимые цветы или цветовую гамму.\n4.  **Предложение вариантов:** Опиши 1-2 наиболее подходящих варианта из ассортимента, указав примерную цену **«вот такой букет обойдется примерно в ~4000 рублей, включая сборку»**.\n5.  **Стимулирование к заказу:** После подбора кратко напомни об условиях: «Если вариант подошел, можем сразу оформить доставку на нужную дату. Оплатить можно онлайн или курьеру».\n6.  **Ответы на вопросы:** Если клиент спрашивает о чем-то из контекста (доставка, оплата, ассортимент) — отвечай четко и информативно, используя данные выше.\n\n# ОГРАНИЧЕНИЯ\n*   Отвечай ТОЛЬКО на вопросы, связанные с цветами, заказами, доставкой и оплатой. На личные вопросы вежливо отказывайся: «Простите, я могу помочь только с выбором цветов и заказом 😊».\n*   Не придумывай несуществующие акции или цены. Если чего-то нет — говори: «К сожалению, такого товара сейчас нет в наличии, но могу предложить альтернативу».\n*   Не давай медицинских или кулинарных советов по использованию цветов.\n*   Если вопрос сложный (возврат, нестандартная жалоба) — предлагай связаться с менеджером по телефону: `+7 (495) XXX-XX-XX`."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -128,
+        -32
+      ],
+      "id": "b3396cdd-eea3-4592-bbd1-65140389612d",
+      "name": "AI Agent",
+      "retryOnFail": true,
+      "waitBetweenTries": 1000,
+      "onError": "continueErrorOutput",
+      "notes": "Ошибка"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4.1-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4.1-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        -128,
+        176
+      ],
+      "id": "e80854d2-1005-41f8-8539-689e647efe55",
+      "name": "OpenAI Chat Model",
+      "retryOnFail": true,
+      "waitBetweenTries": 1000,
+      "credentials": {
+        "openAiApi": {
+          "id": "bnA1y8AMw3lNL9YV",
+          "name": "OpenAi account"
+        }
+      },
+      "onError": "continueErrorOutput",
+      "notes": "ошибка"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('start bot').item.json.message.chat.id }}",
+        "contextWindowLength": 36
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        -32,
+        320
+      ],
+      "id": "4ba47eb8-0212-4677-a2a7-4cbc6d3a43db",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -1376,
+        -16
+      ],
+      "id": "c0e676ba-042a-4387-9fdb-3dd7cc65b439",
+      "name": "start bot",
+      "webhookId": "32b33c00-a338-4c0c-abf3-4dd35a65e1fb",
+      "credentials": {
+        "telegramApi": {
+          "id": "kboUigviIg8bSVhH",
+          "name": "plant help"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('start bot').item.json.message.chat.id }}",
+        "text": "={{ $json.output }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        240,
+        -144
+      ],
+      "id": "764bb125-1546-4f5a-b3aa-b95c95400208",
+      "name": "success_message",
+      "webhookId": "9cb10f6c-fb6e-4251-a689-d13f209e573e",
+      "credentials": {
+        "telegramApi": {
+          "id": "kboUigviIg8bSVhH",
+          "name": "plant help"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "{{ $('start bot').item.json.message.chat.id }}",
+        "text": "={{ $json.output }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        240,
+        48
+      ],
+      "id": "d0978f8f-53c6-4af2-b945-3ecb316ed03c",
+      "name": "error_message",
+      "webhookId": "bbb67d8f-8f5a-4b06-aead-873e52e7e5e8",
+      "credentials": {
+        "telegramApi": {
+          "id": "kboUigviIg8bSVhH",
+          "name": "plant help"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "b2929fef-05a9-4bfe-9178-6a765de25fa5",
+              "name": "telegram_id",
+              "value": "={{ $json.message.chat.id }}",
+              "type": "number"
+            },
+            {
+              "id": "7e796f78-db01-4531-aa6f-4cc40d8b5a83",
+              "name": "username",
+              "value": "={{ $json.message.from.username || $json.message.from.first_name }}",
+              "type": "string"
+            },
+            {
+              "id": "48244ce9-9c5c-4093-88b7-1434ba6e4ab3",
+              "name": "message",
+              "value": "={{ $json.message.text }}",
+              "type": "string"
+            },
+            {
+              "id": "1fc736b5-8525-4c3d-a4ce-c139c5370ace",
+              "name": "message_time",
+              "value": "={{ $now.format('HH часов mm минут ss секунд dd.MM.yyyy') }}",
+              "type": "string"
+            },
+            {
+              "id": "ce3d4ae7-f3b5-4fb8-bcbf-912349959016",
+              "name": "is_repeat",
+              "value": "Нет",
+              "type": "string"
+            },
+            {
+              "id": "2e40dc9c-3ad8-4ae6-9b82-031167453597",
+              "name": "repeat_count ",
+              "value": 0,
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1200,
+        -16
+      ],
+      "id": "f9671de5-25bf-40fa-a8dd-cc44dbe1ebda",
+      "name": "data formatting"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1p_HFjUxzKwbsNHHf-1jlHA3ZrBxB6sBIrcjnp_fmn5I",
+          "mode": "list",
+          "cachedResultName": "Support Inbox",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1p_HFjUxzKwbsNHHf-1jlHA3ZrBxB6sBIrcjnp_fmn5I/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Tickets",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1p_HFjUxzKwbsNHHf-1jlHA3ZrBxB6sBIrcjnp_fmn5I/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "telegram_id",
+              "lookupValue": "={{ $json.telegram_id }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -1024,
+        -16
+      ],
+      "id": "bff5cce7-9c2c-4352-a56f-c6ec6f92a06f",
+      "name": "get telegram_id",
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "vaGgqVHFzRbXVeEU",
+          "name": "account plant"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1p_HFjUxzKwbsNHHf-1jlHA3ZrBxB6sBIrcjnp_fmn5I",
+          "mode": "list",
+          "cachedResultName": "Support Inbox",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1p_HFjUxzKwbsNHHf-1jlHA3ZrBxB6sBIrcjnp_fmn5I/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Tickets",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1p_HFjUxzKwbsNHHf-1jlHA3ZrBxB6sBIrcjnp_fmn5I/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "telegram_id": "={{ $json.telegram_id }}",
+            "message": "={{ $json.message }}",
+            "username": "={{ $json.username }}",
+            "repeat_count": "={{ $json[\"repeat_count \"] }}",
+            "is_repeat": "={{ $json.is_repeat }}",
+            "last_message_at": "={{ $json.last_message_at }}",
+            "first_message_at": "={{ $json.first_message_at}}"
+          },
+          "matchingColumns": [
+            "telegram_id"
+          ],
+          "schema": [
+            {
+              "id": "telegram_id",
+              "displayName": "telegram_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "username",
+              "displayName": "username",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "message",
+              "displayName": "message",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "first_message_at",
+              "displayName": "first_message_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "last_message_at",
+              "displayName": "last_message_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "is_repeat",
+              "displayName": "is_repeat",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "repeat_count",
+              "displayName": "repeat_count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -352,
+        -32
+      ],
+      "id": "1dd6d4d8-d219-4777-9fd6-41fc6c28a452",
+      "name": "table entry",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "vaGgqVHFzRbXVeEU",
+          "name": "account plant"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "03e657f4-7395-4305-a4ee-5aab87eea00f",
+              "name": "telegram_id",
+              "value": "={{ $('data formatting').item.json.telegram_id }}",
+              "type": "number"
+            },
+            {
+              "id": "45b1eaa3-3765-4519-b480-f622e1986218",
+              "name": "username",
+              "value": "={{ $('data formatting').item.json.username }}",
+              "type": "string"
+            },
+            {
+              "id": "0b5b9434-589f-4722-8908-d6912ae10f2a",
+              "name": "message",
+              "value": "={{ $('data formatting').item.json.message }}",
+              "type": "string"
+            },
+            {
+              "id": "d27786d7-d9e5-4940-aafa-cb9dbea51e5c",
+              "name": "first_message_at",
+              "value": "={{ $('data formatting').item.json.message_time }}",
+              "type": "string"
+            },
+            {
+              "id": "d48012b6-94f3-4f74-9c02-ab721772f386",
+              "name": "last_message_at",
+              "value": "={{ $('data formatting').item.json.message_time }}",
+              "type": "string"
+            },
+            {
+              "id": "91c645c0-4bc3-44bf-ad98-291c3af899a5",
+              "name": "is_repeat",
+              "value": "={{ $('data formatting').item.json.is_repeat }}",
+              "type": "string"
+            },
+            {
+              "id": "db373911-0f8d-4baa-94ef-dc062fd9029d",
+              "name": "repeat_count ",
+              "value": "={{ $('data formatting').item.json[\"repeat_count \"] }}",
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -608,
+        -128
+      ],
+      "id": "cd784a41-8092-424f-aba5-042b4d8fc3c0",
+      "name": "first append"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "26c4ae91-bbce-4c29-bbfa-d84ae34bc786",
+              "name": "telegram_id",
+              "value": "={{ $('data formatting').item.json.telegram_id }}",
+              "type": "string"
+            },
+            {
+              "id": "c25469a2-e813-49f6-94de-16a67cab56c1",
+              "name": "username",
+              "value": "={{ $('data formatting').item.json.username }}",
+              "type": "string"
+            },
+            {
+              "id": "25702484-b724-4627-9922-c2677770aee0",
+              "name": "message",
+              "value": "={{ $('data formatting').item.json.message }}",
+              "type": "string"
+            },
+            {
+              "id": "9f3cf3e5-77ae-4f17-9bdc-d47b3d8a640a",
+              "name": "=first_message_at",
+              "value": "={{ $json.first_message_at }}",
+              "type": "string"
+            },
+            {
+              "id": "d97198d3-a1ef-447f-9741-69f12b828fd2",
+              "name": "last_message_at",
+              "value": "={{ $('data formatting').item.json.message_time }}",
+              "type": "string"
+            },
+            {
+              "id": "4209a79c-5596-417b-8fbf-03664d4a8b32",
+              "name": "is_repeat",
+              "value": "=да",
+              "type": "string"
+            },
+            {
+              "id": "27b4d134-2566-4191-94a6-ab7966b4351b",
+              "name": "repeat_count ",
+              "value": "={{ Number($json.repeat_count) + 1}}",
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -608,
+        96
+      ],
+      "id": "db14b894-d922-491c-b05e-9a1d0c82ab5d",
+      "name": "repeated append"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "3f163007-da30-4458-a180-120c1f192454",
+              "leftValue": "={{ $json }}",
+              "rightValue": "",
+              "operator": {
+                "type": "object",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -848,
+        -16
+      ],
+      "id": "27e9488c-5660-4dbe-a94c-32a0861c9ebc",
+      "name": "is_empty"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ],
+      "main": [
+        [
+          {
+            "node": "error_message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "success_message",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "error_message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "start bot": {
+      "main": [
+        [
+          {
+            "node": "data formatting",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "data formatting": {
+      "main": [
+        [
+          {
+            "node": "get telegram_id",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "get telegram_id": {
+      "main": [
+        [
+          {
+            "node": "is_empty",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "table entry": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "first append": {
+      "main": [
+        [
+          {
+            "node": "table entry",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "repeated append": {
+      "main": [
+        [
+          {
+            "node": "table entry",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "is_empty": {
+      "main": [
+        [
+          {
+            "node": "first append",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "repeated append",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "0f184b3e-dc03-4b45-8531-9aac0b28bfa4",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "d3dcfbdbba500686daf81241f820a8867cf92f296d836e87047b54c1f1e0d98e"
+  },
+  "id": "HgvPXSG0O3Uqea7W",
+  "tags": []
+}
