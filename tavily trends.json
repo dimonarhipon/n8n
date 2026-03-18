@@ -1,0 +1,574 @@
+{
+  "name": "Task_Trends",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "weeks"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        48,
+        160
+      ],
+      "id": "1e144f0d-9a64-4b96-b36a-fd8f1a654866",
+      "name": "Start time",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "74f8b9a3-5d3c-485a-9e8e-caa58012f9b5",
+              "name": "query",
+              "value": "remote work statistics",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        320,
+        160
+      ],
+      "id": "56ffc35f-2c1c-4e5c-8b28-d6670700d5a5",
+      "name": "Topic for monitoring"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "results",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        768,
+        160
+      ],
+      "id": "394ed5f1-95c4-42d7-90a3-e1562134e022",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "bc88eadd-e1b7-496b-907a-792a14eea357",
+              "leftValue": "={{ $json.score }}",
+              "rightValue": 0.75,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        976,
+        160
+      ],
+      "id": "6995f1c3-42b7-44b7-a530-8a63f6f2806c",
+      "name": "scope > 0.75"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.tavily.com/search",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "sendHeaders": true,
+        "specifyHeaders": "json",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "query",
+              "value": "={{ $json.query }}"
+            },
+            {
+              "name": "search_depth",
+              "value": "advanced"
+            },
+            {
+              "name": "time_range",
+              "value": "week"
+            },
+            {
+              "name": "country",
+              "value": "russia"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        560,
+        160
+      ],
+      "id": "f4d63050-7b5f-4222-bda3-8b8af064fe2b",
+      "name": "Search Tavily",
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "O6kZujHOCy03t2tX",
+          "name": "Tavily API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fieldsToAggregate": {
+          "fieldToAggregate": [
+            {
+              "fieldToAggregate": "url"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        48,
+        416
+      ],
+      "id": "00f5d02b-e9a6-4a13-b6c9-fb9aa2f58ee6",
+      "name": "generates a list of sites"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.tavily.com/extract",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"urls\": {{ $json.url.toJsonString() }},\n  \"extract_depth\": \"advanced\"\n} ",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        320,
+        416
+      ],
+      "id": "c56d7b66-4b82-4ece-abbb-267fe8af3af8",
+      "name": "Extract Tavily"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "results",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        560,
+        416
+      ],
+      "id": "3f26c357-f434-4caf-9b14-665889c82b19",
+      "name": "Split Out1"
+    },
+    {
+      "parameters": {
+        "fieldsToSummarize": {
+          "values": [
+            {
+              "aggregation": "concatenate",
+              "field": "raw_content"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.summarize",
+      "typeVersion": 1.1,
+      "position": [
+        768,
+        416
+      ],
+      "id": "d2312ccc-be39-44dd-8a1d-cfc45878bd34",
+      "name": "Concat content"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Проанализируй новости.\nНовости получены сегодня (UTC): {{ $now.toUTC().toISO() }}  \nНОВОСТИ,ПОЛУЧЕННЫЕ ИЗ ИНТЕРНЕТА:\n{{ $json.concatenated_raw_content }}\n\nОриентируйся строго на НОВОСТИ,ПОЛУЧЕННЫЕ ИЗ ИНТЕРНЕТА, которые я передал тебе выше.\nБудь внимателен к датам, анализируй контент новостей корректно относительно сегодняшней даты - сегодня {{ $now.toUTC().toISO() }}. Если приводишь в своей сводке события, то обязательно указывай, дату данного события.\n\nСоздай краткий дайджест, переведённый на русский язык. Умести всё для Telegram сообщения с лимитом в 4096 символов, в читаемом формате, с отступами для заголовков, без --- в текстах",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "Ты известный рекрутёр аналитик, который анализирует новости из открытых источников и предоставляет полезные советы, рекомендации, выводы. \nТы помогаешь увидеть дополнительные возможности, которые открываются для получения дохода = это твоя основная задача. Каждую новость ты должен интепретировать с точки зрения того, как ей воспользоваться: как себя обезопасить от потерь либо как получить дополнительный доход - это твой главный фокус."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        64,
+        688
+      ],
+      "id": "af158ffd-9c95-40e4-89ce-a289d31e1968",
+      "name": "AI Review Generator"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "fb-gpt-4.1-3",
+          "mode": "list",
+          "cachedResultName": "fb-gpt-4.1-3"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        64,
+        912
+      ],
+      "id": "ab8d1424-ea57-4d47-9980-ca6c2396e42a",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "bnA1y8AMw3lNL9YV",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "e385de28-da7c-45bd-b68c-b4b9d19839b8",
+              "name": "output",
+              "value": "={{ $json.output.replace(/<think>[\\s\\S]*?<\\/think>\\s*/g, '').trim() }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        560,
+        688
+      ],
+      "id": "c7ac9fbc-8603-4e10-8c46-f788b52c2e32",
+      "name": "AI word replacement"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "={{ $json.output }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        784,
+        688
+      ],
+      "id": "36434edf-e2bb-4c9a-bdae-7f86bbe45f95",
+      "name": "Send a post to a channel",
+      "webhookId": "163530b2-3fb4-47ad-bea7-f7ed352024b5",
+      "credentials": {
+        "telegramApi": {
+          "id": "vXWN7ZYMOJmYCMmh",
+          "name": "Telegram news"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        48,
+        0
+      ],
+      "id": "edbe0b5d-aeef-4446-b9d4-39b98b086522",
+      "name": "Telegram Trigger",
+      "webhookId": "6e27c574-ac98-4377-90ec-978eb89f45de",
+      "credentials": {
+        "telegramApi": {
+          "id": "vXWN7ZYMOJmYCMmh",
+          "name": "Telegram news"
+        }
+      }
+    }
+  ],
+  "pinData": {
+    "Search Tavily": [
+      {
+        "json": {
+          "query": "remote work statistics",
+          "follow_up_questions": null,
+          "answer": null,
+          "images": [],
+          "results": [
+            {
+              "url": "https://pipsc.ca/taxonomy/term/630",
+              "title": "Return to workplace | The Professional Institute of the Public ...",
+              "content": "Data consistently shows that remote work enhances productivity and service delivery. According to Statistics Canada, federal public service productivity grew by 4.5% between 2019 and 2023—while working remotely. Meanwhile, 91% of our members report their meetings remain virtual even when they're mandated to be on-site, creating the absurd scenario of professionals commuting to buildings simply to join video calls they could easily attend from home.\n\nWhat's needed instead is a \"presence with purpose\" approach—being in the office when truly needed, based on operational requirements and job-specific demands. This framework acknowledges that while some roles require physical presence, thousands of others can be performed effectively from anywhere. [...] The benefits extend beyond individual workers. Remote work options save taxpayer money on real estate and overhead costs, help retain talent (studies show flexible options can lower turnover by 25%), and create more inclusive workplaces. For women, caregivers, people with disabilities, and other equity-deserving groups, remote work removes significant barriers to full participation.\n\nUnfortunately, arbitrary return mandates disproportionately impact these same groups. Our surveys show that 50% of racialized employees, LGBTQ2S+ individuals, and people with disabilities are likely to consider leaving public service due to rigid in-office requirements. [...] According to surveys and research by PSAC, 90% of respondents want to either work remotely as much as possible or have a flexible option.This data also shows remote work options and flexible arrangements are key to promoting a healthy work environment and for recruiting and retaining the best talent.\n\n> “The evidence is clear: remote work is good work. Flexible work arrangements allow us to build the modern, productive public service of tomorrow which will benefit everyone in Canada. It saves taxpayers money, is better for the environment, and sets the bar for all workers across the country.”\n>\n> Sharon DeSousa, National President of the Public Service Alliance of Canada",
+              "score": 0.8396422,
+              "raw_content": null
+            },
+            {
+              "url": "https://rentremote.com/blog/top-remote-jobs-2026",
+              "title": "Best Remote Jobs in 2026: Early Trends You Should ...",
+              "content": "Will remote work continue to grow after 2026?  \n Yes — research shows no slowdown in sight. A 2025 Statista study projects that by 2030, nearly 40% of the global workforce will operate in remote or hybrid setups. As businesses realize the benefits of distributed teams — lower overhead, higher productivity, and wider access to talent — remote work will remain a long-term fixture, not a passing trend. [...] ## Remote Work Outlook: 2025 vs 2026\n\nThe remote work landscape is shifting fast — what was booming in 2025 is evolving in 2026. Roles that once defined flexibility, like administrative support and data entry, are seeing reduced demand as automation steps in. Meanwhile, professions tied to AI, cybersecurity, and digital design are thriving.\n\nAccording to Statista (2024), global demand for AI-skilled roles has jumped 32% year-over-year, signaling how companies are doubling down on tech-driven hiring. Traditional office roles are also blending into hybrid models, allowing employees to stay remote while engaging with teams in short, strategic bursts.\n\nGaining traction in 2026: [...] ## Best Remote Jobs 2026: Ranked by Demand and Salary\n\nIf you’re wondering which remote jobs will actually pay the bills (and then some) in 2026, you’re not alone. As remote work keeps growing across data companies, tech startups, and creative industries, professionals are finding that flexibility doesn’t mean sacrificing income or career growth. According to Statista (2024), global hiring for remote roles has surged by over 24% since 2022, proving that flexible work arrangements are now a standard part of the modern workforce.\n\nHere’s a look at the best remote jobs in 2026 — where you can work from anywhere, keep your focus, and still make time for the beach.",
+              "score": 0.77096564,
+              "raw_content": null
+            },
+            {
+              "url": "https://www.huzzle.com/blog/the-state-of-remote-hiring-in-2026",
+              "title": "The State of Remote Hiring in 2026: What's Actually Happening",
+              "content": "Start HiringApply For Work\n\nBlog\n\n# The State of Remote Hiring in 2026\n\nThe headlines would have you believe remote work is dying. Amazon called 350,000 employees back to their desks. JP Morgan ended remote work entirely. The US federal government issued sweeping return to office mandates.\n\nAnd yet, here we are in 2026, and the reality on the ground looks nothing like the doom and gloom would suggest.\n\n### The Numbers Tell a Different Story\n\nDespite the high profile return to office announcements, remote work has held remarkably steady. Around a quarter of jobs that can be done remotely are still fully remote, with over half operating on hybrid arrangements. US remote work rates have stabilised at around 21-23%. [...] What's happening is a tale of two workplaces. Large corporations with expensive real estate commitments are pushing hard for office returns. Meanwhile, thousands of growing companies are quietly expanding their remote hiring, accessing talent pools that simply weren't available to them five years ago.\n\nThe statistics back this up. FlexJobs research shows 85% of workers now say remote work matters more than salary when evaluating a job offer. And 76% said they'd look for a new job if remote work were eliminated.\n\n### Sales Roles Are Leading the Charge [...] A FlexJobs survey found 69% of workers changed or seriously considered changing career fields in the past year, with wanting more remote work options cited as a leading motivator. When someone with five years of enterprise sales experience suddenly finds themselves forced into a daily commute, they start looking. And the companies offering remote flexibility are there to catch them.\n\nThis is reshaping the competitive landscape. Smaller, more agile companies can now recruit talent that would have been out of reach three years ago, simply by offering what the big players are taking away.\n\n### What Actually Works in 2026\n\nAfter years of experimentation, some clear patterns have emerged around what makes remote sales hiring successful.",
+              "score": 0.7574541,
+              "raw_content": null
+            },
+            {
+              "url": "https://www.peoplemanagement.co.uk/article/1947307/remote-working-vs-office-return-%E2%80%93-navigating-new-era",
+              "title": "Remote working vs office return – navigating the new era",
+              "content": "# Remote working vs office return – navigating the new era\n\nAs the pandemic fades into the rearview mirror, the debate over where employees should work continues. George Hull and Charlotte Sloan report\n\nby\nGeorge Hull and Charlotte Sloan\n4 February 2026\n\nPerson sat at a desk with computer screens at home\n\nThe data is clear – remote work has its advantages. According to the Office for National Statistics’ Time Use Survey (March 2024), remote workers are sleeping more, exercising more and reporting higher job satisfaction. In 2025 research by Grant Thornton found nearly 71 per cent of mid-sized businesses are using hybrid models, and 83 per cent of those leaders say it has boosted both productivity and wellbeing.",
+              "score": 0.7309246,
+              "raw_content": null
+            },
+            {
+              "url": "https://www.biospace.com/job-trends/employers-warm-up-to-remote-workers-again-biospace-report",
+              "title": "Employers Warm Up to Remote Workers Again",
+              "content": "While some biopharma professionals feel strongly about workplace flexibility, others are placing less importance on it now than they did a year ago, based on the 2025 survey. While 32% of employed/contract respondents said remote work options were very important to them in their next job, that number was down from 38% in 2024. Similarly, fewer unemployed participants said working remotely was very important in 2025 (31%) than in the year prior (36%).\n\nIn addition, the percentage of respondents saying it was not very or not at all important went up from 13% to 16% year over year for employed/contract workers. It remained nearly the same for unemployed biopharma professionals, at 11% in 2024 and 12% in 2025. [...] The career planning survey supports that assessment. Among employed/contract workers, the top three factors respondents identified as very important to them in their next jobs were growth opportunities (65.6%), work-life balance (65.2%) and company is financially stable (64.6%). Among the unemployed, the top three were company is financially stable (56.2%), work-life balance (55.4%) and benefits (53.7%).\n\n“Remote flexibility is still valued,” Heneghan said, “but fewer candidates are willing to reject a role solely due to on-site expectations or even hybrid expectations, whereas a few years ago, just flat out, a lot of people would say, ‘If it’s not 100% remote, I’ll take a pass,’ because they had so many other options.”\n\nSubscribe to Career Insider! [...] The percentage of respondents saying they’re only focused on local prospects dropped year over year, from 24% to 20%.\n Even the majority (52%) of survey participants who would prefer to hire locally in 2026 would consider remote hires for certain roles.\n\nAs to recent hiring practices, 36% of last year’s survey respondents estimated that in 2025, at least 26% of their new hires were remote, compared to 29% of 2024 participants. In contrast, from 2020 to 2023, 58% of respondents had brought in remote workers.\n\n## The Best Talent Isn’t Always Local",
+              "score": 0.6914979,
+              "raw_content": null
+            }
+          ],
+          "response_time": 1.78,
+          "request_id": "ae6b28ff-9afa-453d-86d2-e17fe3201f2b"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ],
+    "Extract Tavily": [
+      {
+        "json": {
+          "results": [
+            {
+              "url": "https://pipsc.ca/taxonomy/term/630",
+              "title": "Return to workplace | The Professional Institute of the Public ...",
+              "raw_content": "[**Log in**](/member-login)\n\n\n\n**Ottawa, December 8, 2025**— Reacting to news today shared by Prime Minister Carney that a new return to office mandate is coming in the next few weeks, the Professional Institute of the Public Service of Canada (PIPSC) is calling on the federal government to ground any Return to Office (RTO) decisions in evidence, service outcomes, and operational reality.\n\n“Canadians want results, not roll calls,” said PIPSC President Sean O’Reilly. “When the government makes policies about optics instead of outcomes, it risks slowing service delivery, draining talent, and making it harder to recruit the next generation of professionals.”\n\n“We’ve been clear for years: RTO must be about 'presence with purpose,’” continued O’Reilly. “Where in-person work improves innovation, training, or service delivery, that’s great. But forcing people back just to be seen and to sit in on video calls from another location is not leadership. It’s theatre.”\n\nAs unions return to the bargaining table, the timing of the Prime Minister’s comments raises questions that underscore the need for evidence, transparency and collaboration.\n\n“The government has consistently told unions that RTO was not being considered, and its most recent budget made no reference,” said O’Reilly. “We can all agree that no one wants a repeat of past RTO Directives, which were announced without consultation and caused widespread disruption, confusion, and unnecessary strain on labour-management relations.”\n\nPIPSC wrote to the government as recently as last week to reiterate the union’s clear expectations.\n\n“RTO is not a workforce strategy. You can’t modernize government with a 20th-century workplace model.”  \n  \n*PIPSC represents over 85,000 public sector professionals across the country, with the majority employed by the federal government.*\n\n**-30-**\n\nFor more information or a copy of the letter PIPSC sent to TBS please contact : Brittany Smith (416) 841-4325, [**smithb@pipsc.ca**](mailto:smithb@pipsc.ca).\n\n* [Read more about Press Release — “Canadians want results, not roll calls” – PIPSC warns against any arbitrary RTO mandates](/news-issues/press-releases/press-release-canadians-want-results-not-roll-calls-pipsc-warns-against \"Press Release — “Canadians want results, not roll calls” –  PIPSC warns against any arbitrary RTO mandates\")\n\nPublished on 8 December 2025\n\nThe following commentary by PIPSC President was published in the Benefits Canada Magazine's Head to head Section, featuring Mark Ma, associate professor of business administration at the University of Pittsburgh’s Katz Graduate School of Business and Sean O’Reilly.\n\n\\* \\* \\* \\* \\* \\* \\* \\* \\*\n\n## [Head to head: Should employers be mandating employees back to the office?](https://www.benefitscanada.com/archives_/benefits-canada-archive/head-to-head-should-employers-be-mandating-employees-back-to-the-office/)\n\nFive years after the coronavirus pandemic normalized the concept of remote working, academic and union thought leaders agree there’s no evidence supporting return-to-office mandates.\n\n**Sean O’Reilly, president, the Professional Institute of the Public Service of Canada**\n\nThe future of work isn't about counting days in an office—it's about supporting all Canadian workers to deliver the best results. The federal government one-size-fits-all return-to-office mandates ignore this reality and the overwhelming evidence supporting flexible work arrangements.\n\nData consistently shows that remote work enhances productivity and service delivery. According to [Statistics Canada](https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=3610048001), federal public service productivity grew by 4.5% between 2019 and 2023—while working remotely. Meanwhile, [91% of our members](https://pipsc.ca/news-issues/press-releases/press-release-pipsc-survey-reveals-most-members-dont-have-office-to#:~:text=%2291%25%20of%20PIPSC%20members%20said,same%20building%20as%20their%20teammates.%22) report their meetings remain virtual even when they're mandated to be on-site, creating the absurd scenario of professionals commuting to buildings simply to join video calls they could easily attend from home.\n\nWhat's needed instead is a \"presence with purpose\" approach—being in the office when truly needed, based on operational requirements and job-specific demands. This framework acknowledges that while some roles require physical presence, thousands of others can be performed effectively from anywhere.\n\nThe benefits extend beyond individual workers. Remote work options save taxpayer money on real estate and overhead costs, help retain talent (studies show flexible options can lower turnover by 25%), and create more inclusive workplaces. For women, caregivers, people with disabilities, and other equity-deserving groups, remote work removes significant barriers to full participation.\n\nUnfortunately, arbitrary return mandates disproportionately impact these same groups. Our surveys show that 50% of racialized employees, LGBTQ2S+ individuals, and people with disabilities are likely to consider leaving public service due to rigid in-office requirements.\n\nThe pandemic proved that flexible work arrangements can succeed. Rather than clinging to outdated workplace models, employers – the Canadian government leading the way – should embrace evidence-based approaches that enhance productivity while improving workers' lives. The organizations that thrive will be those that support working arrangements based on results and operational needs, not physical presence for its own sake.\n\n* [Read more about O'Reilly: The Future of Work Demands Presence with Purpose, Not Arbitrary Mandates](/news-issues/announcements/oreilly-future-work-demands-presence-purpose-not-arbitrary-mandates \"O'Reilly: The Future of Work Demands Presence with Purpose, Not Arbitrary Mandates\")\n\nPublished on 4 July 2025\n\n**OTTAWA, January 27, 2025** – Federal unions representing more than 330,000 workers have launched a [national campaign](https://www.remoteworks.ca/) promoting remote work as the future of work for millions of workers in Canada.\n\nThe campaign from the [Public Service Alliance of Canada](https://psacunion.ca/) (PSAC), the [Canadian Association of Professional Employees](https://www.acep-cape.ca/en) (CAPE) and the Professional Institute of the Public Service of Canada (PIPSC) highlights the benefits of remote work for people in Canada – more productivity, less congestion on our roads, reduced pollution and better work-life balance for families.\n\nThe initiative highlights the overwhelming evidence that a one-size-fits-all approach to remote work is ineffective for Canada’s diverse public service and its future, and families who rely on public services pay the price. The campaign will be featured on the radio, in print, on social media and out-of-home ads across the country.\n\nAccording to surveys and research by PSAC, 90% of respondents want to either work remotely as much as possible or have a flexible option.This data also shows remote work options and flexible arrangements are key to promoting a healthy work environment and for recruiting and retaining the best talent.\n\n> “The evidence is clear: remote work is good work. Flexible work arrangements allow us to build the modern, productive public service of tomorrow which will benefit everyone in Canada. It saves taxpayers money, is better for the environment, and sets the bar for all workers across the country.”\n>\n> **Sharon DeSousa, National President of the Public Service Alliance of Canada**\n\n> “At a time when employees are being asked to do far more with far less, promoting greater flexibility, especially through expanded telework, remains relevant and is critical for retaining top talent. With departments facing cuts and pressures increasing dramatically, the federal government must lead by example and provide the best possible working conditions, while saving taxpayers billions of dollars. It has already been conclusively proven that telework improves productivity and employee well-being where it makes sense – it’s time for Canada to catch up.”\n>\n> **Nathan Prier, President of the Canadian Association of Professional Employees**\n\n> “The future of work isn’t about counting days in an office, it’s about supporting professionals to deliver the best results for Canadians. By expanding remote and telework options in the federal public service, we can save taxpayer money, boost productivity, and improve workers’ lives – driving outcomes that benefit everyone. The key is 'presence with purpose'.”\n>\n> **Sean O’Reilly, President of the Professional Institute of the Public Service of Canada**\n\nFederal unions are urging the government to adopt flexible work arrangements, allowing workers to be more productive, have better work-life balance and make life more affordable. This should not be a political decision. Regardless of the political party in power, remote work is a viable option for the federal public service that could save taxpayers money and help make the public service even more productive.  The future of work is remote.\n\nWe are also calling on the public to join the movement and support remote work — not just for the federal public service, but as a new norm for workplaces across the country. The government could lead the way in creating modern and more productive workplaces. We invite all those who wish to participate to amplify this critical conversation on social media using the hashtag #RemoteWorks. Together, we will advocate for remote work and a thriving public service.\n\n- 30 -\n\n**For media inquiries:**\n\n**PSAC: [Media@psac-afpc.com](mailto:Media@psac-afpc.com )**\n\n**CAPE: [Media@acep-cape.ca](mailto:Media@acep-cape.ca)**\n\n**PIPSC: [jfillion@pipsc.ca](mailto:jfillion@pipsc.ca)**\n\n* [Read more about Press Release — Federal unions join forces to launch new remote work campaign](/news-issues/press-releases/press-release-federal-unions-join-forces-to-launch-new-remote-work \"Press Release — Federal unions join forces to launch new remote work campaign\")\n\nPublished on 27 January 2025\n\n**OTTAWA, December 3, 2024** – In a clear violation of the [established direction allowing flexibility for Indigenous federal employees to work remotely](https://www.canada.ca/en/government/publicservice/staffing/direction-prescribed-presence-workplace.html), many Indigenous employees have been ordered to report to their designated work site in person without any justification – despite meeting all of the criteria for an exception. The Canadian Association of Professional Employees (CAPE), the Public Service Alliance of Canada (PSAC), the Professional Institute of the Public Service of Canada (PIPSC) and the Indigenous Federal Employees Network (IFEN) are [calling on the Treasury Board](https://www.acep-cape.ca/sites/default/files/2024-11/Letter%20to%20Anita%20Anand-Indigenous%20Exemption%20RTO%20-%20Nov%202024%20signed.pdf) to uphold the remote work exception for Indigenous federal employees and ensure its consistent enforcement across all departments. It is critical that the exception is applied equitably, reflecting the original intent to provide flexibility and support for Indigenous public sector employees.\n\nThe exception was originally developed to enable Indigenous employees to live and work in their communities, recognizing the importance of maintaining strong cultural and familial connections. Those ties are fundamental and frequently influence employment-related decisions, as highlighted in the Treasury Board’s own policy, which acknowledges that, for many Indigenous people, living and working within their communities is “critical to their identity.” Ensuring the exception is honoured upholds this principle and supports the preservation of cultural integrity and well-being among Indigenous employees.\n\nThe Treasury Board has repeatedly emphasized the importance of Indigenous employees working in their communities as a key reconciliation commitment. This commitment reflects the government’s broader pledge to respect Indigenous self-determination and cultural continuity. However, IFEN has reported that management in multiple departments are ignoring these exceptions, undermining this critical reconciliation initiative. Such actions erode trust and diminish the government’s ability to rebuild relationships with Indigenous peoples. Furthermore, this disregard negatively impacts the recruitment and retention of Indigenous employees, contradicting the government’s stated commitment to fostering an inclusive and supportive environment that acknowledges and respects the unique needs and priorities of Indigenous communities.\n\n**Quotes**\n\n> “This devotion to a poorly considered in-office presence mandate – at the expense of Indigenous rights – sends the wrong message and shows the government’s lack of coherence when it comes to its stated goals of respect and reconciliation,” said **Nathan Prier, president of the Canadian Association of Professional Employees**. “This government seems to have a poor appreciation for the critical importance of this exception which is right at the heart of Indigenous cultural survival and wellbeing. We are calling on the government to honour its commitment to Indigenous peoples by ensuring the exception is upheld and respected evenly across the federal public sector.”\n\n> \"Reimagining the future of work is about more than just remote work; it’s about setting a new standard for progressive, inclusive and dynamic workplaces,\" said **Sharon DeSousa, PSAC national president**. \"The federal government is missing a unique opportunity to dismantle systemic barriers that suppress marginalized voices and to create a federal public service that reflects every slice of Canadian life, particularly from Indigenous communities and small towns.\"\n\n>  \"The federal government's failed return-to-office mandate is once again showing its true colours—this time ignoring the rights of Indigenous workers,\" said **Jennifer Carr, president of PIPSC.** “Denying Indigenous employees the exemption to work from their communities isn't just a benign oversight; it’s the kind of blatant disregard that has real impacts on Indigenous rights, safety, and cultural identity. It must be corrected—now.\"\n\n> “Ignoring this exception directly undermines obligations set out in the *United Nations Declaration on the Rights of Indigenous Peoples, the Truth and Reconciliation Commission’s Calls to Action*, the final report of the National Inquiry into 2SMMIWG+, and the Clerk’s Indigenous hiring targets, along with other repeatedly stated national reconciliation goals,” said the executives of the **Indigenous Federal Employees Network**. “This exception must be clearly communicated to all managers, including those at the ADM level, across all departments without delay to prevent further stress and harm to Indigenous employees.”\n\n\\*\\*\\*\\*\\*\n\n**About CAPE**\n\nWith more than 25,000 members, the Canadian Association of Professional Employees is one of the largest federal public sector unions in Canada, dedicated to advocating on behalf of federal employees in the Economics and Social Science Services (EC) and Translation (TR) groups, as well as employees of the Library of Parliament (LoP), the Office of the Parliamentary Budget Officer (OPBO) and civilian members of the RCMP (ESS and TRL). [Read more](https://www.acep-cape.ca/en).\n\n**About PSAC**\n\nThe Public Service Alliance of Canada is Canada’s largest federal public service union, representing nearly 230,000 workers in every province and territory in Canada, including more than 165,000 federal public service workers. [Read more.](https://psacunion.ca/)\n\n**About PIPSC**\n\nThe Professional Institute of the Public Service of Canada (PIPSC) was founded in 1920. With over 75,000 members, the Institute is the largest union in Canada representing scientists and professionals employed at the federal and some provincial and territorial levels of government. [Read more.](https://pipsc.ca/)  \n  \n**About IFEN**  \n  \n The Indigenous Federal Employee Network (IFEN) is dedicated to fostering a respectful and inclusive federal public service where First Nations, Inuit, and Métis employees can thrive professionally while embracing their cultural identities. IFEN builds interdepartmental connections, champions workplace equity, supports personal and professional growth, and advocates for a balanced integration of Indigeneity within public service roles.\n\n* [Read more about Press Release — Federal unions call on Treasury Board to uphold the Indigenous exception to return-to-office mandate](/news-issues/press-releases/press-release-federal-unions-call-on-treasury-board-to-uphold-indigenous \"Press Release — Federal unions call on Treasury Board to uphold  the Indigenous exception to return-to-office mandate\")\n\nPublished on 3 December 2024\n\nPIPSC firmly stands with the Indigenous Federal Employees’ Network (IFEN) in advocating for fair treatment of Indigenous public sector workers. Many federal Indigenous employees, including PIPSC members, have raised serious concerns about the implementation of the federal government’s Return-to-office (RTO) mandate. These concerns centre around the denial of exemptions for Indigenous employees living within 125 km of their formal work location.\n\nThe federal government’s **RTO mandate includes a key standalone exemption** allowing Indigenous employees to work from their communities no matter their proximity to the office. This exemption is critical for both cultural identity and personal safety. However, many Indigenous workers have faced repeated denials of this exception.  \n  \n Denying this exemption directly contradicts the federal government’s obligations under the United Nations Declaration on the Rights of Indigenous Peoples and the Truth and Reconciliation Commission’s Calls to Action. The arbitrary restriction is especially harmful to Indigenous women, whose safety concerns—amid the ongoing crisis of Missing and Murdered Indigenous Women and Girls (MMIWG)—make remote work a vital option.\n\nThe denial of exemptions undermine the well-being of Indigenous employees and Canada’s commitment to reconciliation. Treasury Board President, Anita Anand, needs to step in.\n\nPIPSC, alongside other unions, is calling for immediate action from Anand to clarify the standalone exemption for Indigenous people to all Deputy Ministers, their equivalents, and any relevant senior civil service staff in all federal departments and agencies covered by the mandate before November 28, 2024.\n\nIndigenous employees have the right to work in a way that respects cultural needs, personal safety, and well-being. PIPSC will always advocate to ensure these rights are respected and protected in the workplace.\n\n[**Read our joint letter to Treasury Board President, Anita Anand.**](https://pipsc.ca/sites/default/files/comms/RTO/Letter-to-AnitaAnand-IndigenousExemptionRTO-Nov2024%20signed.pdf)\n\n* [Read more about PIPSC supports Indigenous federal employees in remote work exemption dispute](/news-issues/announcements/pipsc-supports-indigenous-federal-employees-in-remote-work-exemption-0 \"PIPSC supports Indigenous federal employees in remote work exemption dispute\")\n\nPublished on 22 November 2024\n\n**OTTAWA, October 23, 2024** – The Professional Institute of the Public Service of Canada (PIPSC) joins the Canadian Association of Public Employees (CAPE) in urging the Standing Committee on Government Operations and Estimates (OGGO) to conduct a thorough investigation into the federal government's return-to-office (RTO) mandate.\n\n[**This call**](https://drive.google.com/file/d/1I9QOeUFjYD49MGxz5lvgBLvQA6BMxNPQ/view?usp=drive_link) arises from growing concerns regarding the lack of evidence-based decision-making that led to the current mandate, the impact on employee productivity and morale, and serious health and safety concerns that have been raised by members of the public service.\n\nPIPSC is alarmed by the government's approach to returning employees to the office. This is particularly true in the wake of significant changes in work patterns brought on by the COVID-19 pandemic, the known productivity gains of flexible telework, and the government’s own acknowledgement of its benefits. The union emphasizes that many public servants have adapted to flexible work models that enhance productivity and support work-life balance, which are at risk with the mandatory “one-size-fits-all” approach.\n\n“Our members are being forced to return to grossly inadequate offices without justification or consideration of the varying circumstances in which they operate,” said PIPSC President Jennifer Carr. “The lack of sound, evidence-based decision-making seriously impacts employees and wholly disregards the benefits of flexible working arrangements to all Canadians – from productivity gains to better equity, diversity, and inclusion, and opening up good public sector jobs across Canada.”\n\n“Modern, flexible work models enhance public service delivery,” continued Carr. “Canadians should be concerned that the government chose an approach that erodes trust, morale, productivity and ultimately, the strength of public services Canadians rely on. We want answers – and a better path forward, which is why we’re demanding an investigation.”  \n  \n**[See the letter to OGGO](https://drive.google.com/file/d/1I9QOeUFjYD49MGxz5lvgBLvQA6BMxNPQ/view).**\n\n*The Professional Institute of the Public Service of Canada represents over 75,000 public service professionals across Canada, including federal scientists and researchers, engineers, and health care workers.* *Follow us on*[*Facebook*](https://www.facebook.com/PIPSC.IPFPC)*, on*[*X*](https://twitter.com/PIPSC_IPFPC),*and* [*Instagram*](https://www.instagram.com/pipsc.ipfpc/)*.*\n\n-30-\n\n**For more information: Johanne Fillion, 613-883-4900 (mobile),** [**jfillion@pipsc.ca**](mailto:jfillion@pipsc.ca)\n\n* [Read more about Press Release — PIPSC Calls on the House of Commons to Investigate Government’s Return-to-Office Mandate](/news-issues/press-releases/press-release-pipsc-calls-on-house-commons-to-investigate-governments-0 \"Press Release — PIPSC Calls on the House of Commons to Investigate Government’s Return-to-Office Mandate\")\n\nPublished on 23 October 2024\n\nInternal documents obtained by the Public Service Alliance of Canada (PSAC) through access to information requests revealed that the government ignored its own evidence that telework boosts productivity. The government also analyzed trends and flexible work models – before implementing the controversial telework mandate that ignores the benefits of those trends and models. And despite anticipating significant challenges and backlash, the government dismissed these concerns in favour of pushing ahead with its rigid mandate it knew would fail.\n\n### A Refusal to Adapt\n\nThe documents confirm what the Professional Institute of the Public Service of Canada (PIPSC) and other unions have been asserting all along - the telework mandate is driven by politics, not productivity.\n\nThe government's hypocrisy is stunning. Just two years ago, they were touting telework as a key component of a modern and effective public service. One of their own key takeaways from a pilot project work was that “one size does not fit all”. Now, they have done a complete 180-degree turn – and as the access to information documents reveal – without any logic, data, or justification. It's an embarrassing refusal to adapt to the realities of today's workforce.\n\n### Control Without Leadership\n\nIf the government was truly concerned about consistency and alignment, they would have consulted with stakeholders and examined the wider range of flexible work models. Instead, they took a lazy and coercive approach that benefits no one and risks eroding trust and productivity.\n\nBy forcing employees back to the office for a set number of days, regardless of their job requirements or individual circumstances, the government is making a clear power play. It's a way for management to reassert control and monitor workers, even at the expense of efficiency, morale, and retention.\n\nIf the government was genuinely committed to a high-performing, modern public service, they would embrace the proven benefits of flexible telework arrangements. Instead, they're clinging to an outdated, command-and-control mentality that prioritizes presenteeism over results. This rigid approach fails to recognize the diverse needs and constraints of different departments, risking a repeat of past mistakes.\n\n### Phoenix Parallels\n\nThe government's reckless rollout of the return-to-office mandate bears eerie similarities to the Phoenix pay system fiasco. In both cases, they rushed to implement massive changes without proper analysis, consultation, or consideration of the consequences for employees.\n\nAnd just like with Phoenix, the government is ignoring red flags and expert advice in its single-minded pursuit of their preferred option.\n\nThe TBS documents show they anticipated significant challenges and backlash, yet dismissed these concerns - a frighteningly familiar pattern.\n\nThe Phoenix debacle taught us that forcing a one-size-fits-all approach across the entire public service is a recipe for disaster. Departments have diverse needs and constraints that can't be ignored. By rigidly mandating RTO policies, the government is repeating the mistakes of the past.\n\nTransparency and meaningful consultation could have prevented much of the damage caused by Phoenix. Yet once again, the government is making sweeping decisions that impact thousands of workers with minimal notice and no real dialogue. Have they learned nothing from previous failures?\n\n### Reverse the Mandate\n\nIt's time for the government to listen to the concerns of public servants and their unions. The RTO mandate must be reconsidered, and a more flexible, evidence-based approach should be adopted. Only then can we build a truly modern and effective public service that benefits both employees and the Canadians they serve.\n\n* [Read more about The Return-to-Office Mandate: A Power Play Driven by Politics, Not Productivity](/news-issues/announcements/return-to-office-mandate-power-play-driven-by-politics-not-productivity \"The Return-to-Office Mandate: A Power Play Driven by Politics, Not Productivity\")\n\nPublished on 1 October 2024\n\n**OTTAWA, September 9, 2024** — Unions representing more than 330,000 federal public service workers are demanding that the government reverse its three-day in-office mandate and return to a policy of remote work flexibility. Beginning today, federal employees are being ordered to work from ill-equipped and unsanitary office buildings three days a week, despite a lack of proper workspaces or a coherent policy across departments.\n\nThe Public Service Alliance of Canada (PSAC), the Professional Institute of the Public Service of Canada (PIPSC), the Canadian Association of Professional Employees (CAPE) and the Association of Canadian Financial Officers (ACFO) have been united in their opposition to the government’s misguided mandate since it was announced May 1.\n\nFederal public service workers are holding protests across the country this week to contest the government’s policy and fight for a fair approach to remote work that puts workers and their families first.\n\nUnions marked the beginning of the three-day mandate with a rally in front of the Immigration, Refugees and Citizenship Canada building in Ottawa, which has a large inter-union local organizing committee mobilizing workers against the mandate.\n\n“In a direct attack on Canadian taxpayers and basic logic, the government has decided to forge ahead with this ludicrous plan to pressure employees back into cramped and unfit office space that nobody wants or needs to be in,” said CAPE President Nathan Prier. “Our members are clogging up roadways, buses and trains to go to disgusting offices that don’t have space for them to sit on video calls that could be done more effectively at home. This mandate is not only exacerbating existing problems – it is creating new ones.”\n\nAs the future of work evolves, remote work has become more than just a temporary solution — it’s a proven model that enhances productivity and the well-being of workers. Flexible remote work policies allow workers to balance their professional and personal responsibilities, while reducing their environmental impact and strengthening local communities.\n\n“Telework isn’t just a trend, it’s the future of work and the next frontier of workers’ rights,” said PSAC National President Sharon DeSousa. “We’ve seen firsthand how remote work improves peoples’ lives and makes our public service more inclusive and responsive to the needs of Canadians. That’s why we’re committed to fighting for a future that puts workers first.”\n\n“In an increasingly competitive job market, the public service needs to position itself as an equitable and innovative employer,” said PIPSC National President Jennifer Carr. “By implementing progressive work policies, we can attract the brightest minds from across Canada – regardless of their geographic location – and retain the exceptional talent we already have.”\n\nSome departments had previously told their employees that they would not be able to implement the three-day in-office policy by today’s deadline, as they simply do not have the space to accommodate the influx of staff. Arbitrary enforcement of this unnecessary policy has resulted in confusion and resentment across the federal public sector.\n\nCanada’s federal public service unions announced last week they will be launching a national campaign to reverse the government’s mandate and secure remote work rights in workers’ collective agreements. Remote work is the new standard. The flexibility to work remotely will be a requirement for the next generation of employees and is essential to ensure the public sector is modernized, adaptable and ready to overcome the challenges of the 21st century.\n\n* [Read more about Press Release — Canada’s federal public service unions vow to continue fight for remote work rights as revised Direction on prescribed presence in the workplace takes effect](/news-issues/press-releases/press-release-canadas-federal-public-service-unions-vow-to-continue \"Press Release — Canada’s federal public service unions vow to continue fight for remote work rights as revised Direction on prescribed presence in the workplace takes effect\")\n\nPublished on 9 September 2024\n\n**OTTAWA, September 5, 2024** – The Professional Institute of the Public Service of Canada (PIPSC) is mobilizing public servants to push back against the Treasury Board's inflexible 3-day return-to-office (RTO) mandate. In a show of solidarity, PIPSC and other public sector unions held a rally today over lunch time in Ottawa downtown (corner of Laurier and Bank).\n\nPIPSC President Jenn Carr challenges the lack of rationale behind the mandate: \"PIPSC represents some of the most data-driven professionals in Canada. So when the government makes a sweeping decision like this without solid data to back it up, we have to ask: what's really driving this?\"\n\nPIPSC's own data reveals significant concerns about the mandate's impact, particularly when it comes to equity and inclusion.\n\n\"The government claims to care about growing a diverse workforce,” continued Carr. “But our recent survey shows this mandate will hit our most vulnerable members the hardest.\"\n\nThe survey highlighted that a majority of women worry about balancing work and personal responsibilities under the new policy. Persons with disabilities report being more than twice as likely to struggle with managing accommodations. Additionally, a substantial portion of LGBTQ2S+ and racialized members indicate they're likely to consider leaving their jobs over this mandate.\n\nLooking at these numbers, Carr expressed concern about the impact of this mandate on the future of the public service. \"This ill-informed, one-size rejection of presence with purpose will limit our ability to continue to attract and retain the best and brightest from coast to coast to coast, once again.\"\n\nThe union argues that the government's approach fails to consider the progress made in recent years, which showed the value of flexible work arrangements.\n\n\"So what are we left with?” asks Carr. “A policy that threatens to push out diverse talent, worsen mental health, and make life more difficult for those already struggling. And for what? A solution to a problem that doesn't exist.\"\n\nPIPSC is calling on the government to provide clear, data-driven justification for the mandate and to implement flexible work arrangements that account for individual needs and circumstances.\n\n*The Professional Institute of the Public Service of Canada represents over 75,000 public service professionals across Canada, including federal scientists and researchers, engineers, and health care workers.* *Follow us on*[*Facebook*](https://www.facebook.com/PIPSC.IPFPC)*, on*[*X (formerly known as Twitter)*](https://twitter.com/PIPSC_IPFPC) *and on*[*Instagram*](https://www.instagram.com/pipsc.ipfpc/)*.*\n\n* [Read more about Press Release — Public Servants Rally to Tell Treasury Board: “Remote Works!”](/news-issues/press-releases/press-release-public-servants-rally-to-tell-treasury-board-remote-works \"Press Release — Public Servants Rally to Tell Treasury Board: “Remote Works!”\")\n\nPublished on 5 September 2024\n\nAs the September 9 deadline for the federal government’s three-day in-office mandate draws near, many of our members at PIPSC have shared their concerns about the potential impacts on equity, the environment, and the well-being of hardworking federal public servants.\n\n**PIPSC is joining forces with other federal public service unions to host a virtual town hall on remote work.** This event is a key opportunity for us to update you on our ongoing efforts to advocate for your interests, explore the challenges presented by the in-office mandate, and discuss how we can work together toward a future where flexible work arrangements are standard.\n\nJoin us as we continue to champion a work environment that prioritizes the well-being and efficiency of all employees. Because at PIPSC, we believe #RemoteWorks.\n\n**Join one of three town hall sessions :**\n\n* [**Tuesday, August 27, 5 PM ET**](https://action.pipsc.ca/r?u=v_VhwiCIUlOw_zF3V0mZ87teNr8BlAGxqB0tJXY2uYC8Mwfl2g0eDEyS9qSlGe3O&e=21d869ebc189ed5ed9fc9292537a8e6f&utm_source=pipsc&utm_medium=email&utm_campaign=rtotownhall0826e&n=2&test_email=1)\n* **[Wednesday, August 28, 12 PM ET](https://action.pipsc.ca/r?u=v_VhwiCIUlOw_zF3V0mZ86JXoTYouRydy9OF3qUw8hYVO5CBjYO8PkOrs54-QQx-&e=21d869ebc189ed5ed9fc9292537a8e6f&utm_source=pipsc&utm_medium=email&utm_campaign=rtotownhall0826e&n=3&test_email=1)**\n* **[Wednesday, August 28, 8 PM ET](https://action.pipsc.ca/r?u=v_VhwiCIUlOw_zF3V0mZ8z7PiSACdr3R5bCK6RyUsw6x7nHDOQ-1YDC8_1Z0yPO3&e=21d869ebc189ed5ed9fc9292537a8e6f&utm_source=pipsc&utm_medium=email&utm_campaign=rtotownhall0826e&n=4&test_email=1)**\n\n**Meet the panelists:**\n\n* Jennifer Carr, President, Professional Institute of the Public Service of Canada (PIPSC)\n* Sharon DeSousa, National President, Public Service Alliance of Canada (PSAC)\n* Nathan Prier, National President, Canadian Association of Professional Employees (CAPE)\n* Dany Richard, President, Association of Canadian Financial Officers (ACFO)\n\nThe government’s recent directive risks reversing the significant gains we've achieved with remote work, a model that allowed our members to provide presence with purpose.\n\nWe invite you to attend our town hall to discuss the implications of this mandate and explore how we can unite to effectively advocate against it.\n\nMake sure your voice is heard as we advocate for a modern, inclusive, and flexible workplace. Join us in shaping a future that upholds our shared values and needs.\n\n* [Read more about Join a national virtual town hall on why #RemoteWorks](/news-issues/return-to-workplace/join-national-virtual-town-hall-on-why-remoteworks \"Join a national virtual town hall on why #RemoteWorks\")\n\nPublished on 26 August 2024\n\n[Subscribe to Return to workplace](https://pipsc.ca/taxonomy/term/630/feed)\n\n ",
+              "images": []
+            },
+            {
+              "url": "https://rentremote.com/blog/top-remote-jobs-2026",
+              "title": "Best Remote Jobs in 2026: Early Trends You Should ...",
+              "raw_content": "[Our Workstations](https://rentremote.com/workstations)\n\n[Remote Travel Guides](https://rentremote.com/travel-guide)\n\n## Find a home in popular cities\n\n[View all locations →](https://rentremote.com/a/furnished-apartments \"Browse all available locations\")\n\n## Find a home by country\n\n## Featured Properties\n\n[### Featured\n\n## Barcelona, Spain](https://rentremote.com/l/apartments/spain-spacious-trendy-flat-with-home-office-setup-in-barcelonas-el-born-district)\n\n[### Featured\n\n## Barcelona, Spain](https://rentremote.com/l/apartments/spain-upscale-open-plan-studio-with-bright-home-office-for-remote-work-in-barcelona)\n\n[### Featured\n\n## Barcelona, Spain](https://rentremote.com/l/apartments/spain-modern-70m2-barcelona-flat-with-private-office-for-remote-work-enthusiasts)\n\n## Trending Cities\n\nDiscover our most popular destinations for remote work\n\n[View all →](https://rentremote.com/a/furnished-apartments)\n\n### Barcelona\n\nExplore 1863 stunning properties in this vibrant city\n\n1863 Listings\n\n### Paris\n\nFind your perfect home among 141 handpicked accommodations\n\n141 Listings\n\nExplore\n\n### Medellin\n\nDiscover 223 exceptional stays for your next adventure\n\n223 Listings\n\nExplore\n\n### Valencia\n\nBrowse 128 carefully curated properties in this destination\n\n128 Listings\n\nExplore\n\n### Mexico City\n\nUncover 780 unique accommodations in this amazing location\n\n780 Listings\n\nExplore\n\n### Explore All Cities\n\nDiscover amazing destinations worldwide for your remote work journey\n\nView all destinations\n\n## Premium Workstations\n\nDiscover our professional-grade equipment for remote work\n\n### UltraWide Monitor\n\nExperience a workspace that feels as expansive as your imagination with our UltraWide Monitor.\n\n### Standing Desk\n\nSay goodbye to sedentary workdays with our dynamic Standing Desk.\n\n### Ergonomic Chair\n\nComfort meets functionality with our premium Ergonomic Chair.\n\n### Studio Microphone\n\nMake every word count with our crystal-clear Studio Microphone.\n\n### HD Webcam\n\nYour online presence deserves the best with our HD Webcam.\n\n### View All Equipment\n\nLearn more\n\n## Latest Travel Guides\n\nDiscover amazing destinations and insider tips\n\n[View all →](https://rentremote.com/travel-guide)\n\nFeatured   Activities\n\nBuenos Aires\n\n#### Buenos Aires Monthly Cost of Living: How Apartment Rentals Work in Argentina’s Capital\n\nFeb 3, 2026 \n\nRead more\n\nActivities\n\nBarcelona\n\n#### What’s Included in Furnished Monthly Apartments in Barcelona\n\nFeb 2, 2026 \n\nRead more\n\nActivities\n\nMadrid\n\n#### What’s Included in Monthly Furnished Apartments Madrid\n\nJan 31, 2026 \n\nRead more\n\nActivities\n\nLisbon\n\n#### How Monthly Rentals in Lisbon Work: A Practical Guide for Longer Stays\n\nJan 30, 2026 \n\nRead more\n\nNeighborhoods\n\nDubai\n\n#### Furnished Apartments Dubai Marina: What’s Included in a Monthly Stay\n\nJan 29, 2026 \n\nRead more\n\nActivities\n\nMexico City\n\n#### Mexico City Cool Things to Do: A Local-First Guide to Culture, Food, and Everyday Life\n\nJan 29, 2026 \n\nRead more\n\nActivities\n\nLisbon\n\n#### Cost of Living Lisbon: Guide for Nomads, Expats & Travelers\n\nJan 27, 2026 \n\nRead more\n\nActivities\n\nBarcelona\n\n#### What to Do in Gothic Quarter Barcelona: A Walk Through the Old City\n\nJan 26, 2026 \n\nRead more\n\n### Featured Destinations\n\n[View all →](https://rentremote.com/travel-guide)\n\n#### Lisbon\n\nPortugal\n\n42 Guides\n\n#### Barcelona\n\nSpain\n\n40 Guides\n\n#### Madrid\n\nSpain\n\n36 Guides\n\n#### Explore All Guides\n\nView complete travel guide\n\n[Sign in](https://rentremote.com/login)\n\nJobs   Remote Life   Digital Nomads\n\n# Best Remote Jobs in 2026: Early Trends You Should Prepare For\n\nDiscover the top remote jobs 2026, with in-demand positions, salary insights, skill forecasts, and how to prepare for the fastest-growing remote careers.\n\n## **The Future of Remote Jobs in 2026**\n\nBy 2026, *remote jobs* are the norm. More *companies* across *industries* are dropping rigid *office* rules in favor of flexible *hybrid jobs* that attract top *job seekers*. With 39% of global *remote workers* expected by 2026 (Gartner, 2024), the world of work is officially borderless.\n\n### **What’s Driving the Growth**\n\n*AI, automation,* and smarter *services* are reshaping how *employers* hire and how *career* paths evolve. From tech to education, *demand* for skilled remote talent keeps rising as digital tools boost *productivity* and collaboration.\n\n**Top trends shaping 2026:**\n\n* AI-led hiring reshaping *entry level* roles\n* Global *location* flexibility becoming standard\n* *Industries* investing in digital-first training\n* Cities like *Lisbon* and *Mexico City* are booming with coworking cafés with the best Wi-Fi and espresso combo.\n\nDiscover how RentRemote makes remote work easier.\n\n## **Best Remote Jobs 2026: Ranked by Demand and Salary**\n\nIf you’re wondering which *remote jobs* will actually pay the bills (and then some) in 2026, you’re not alone. As *remote work* keeps growing across *data companies*, tech startups, and creative industries, *professionals* are finding that flexibility doesn’t mean sacrificing income or *career* *growth*. According to Statista (2024), global *hiring* for remote roles has surged by over 24% since 2022, proving that *flexible work arrangements* are now a standard part of the modern *workforce*.\n\nHere’s a look at the **best remote jobs** in 2026 — where you can work from anywhere, keep your *focus*, and still make time for the beach.\n\n| **Job Title** | **Avg. Salary (USD)** | **Growth Outlook** | **Core Skills** |\n| --- | --- | --- | --- |\n| Remote Software Engineer | $110,000 | Strong | Python, AI tools, APIs |\n| Data Analyst / Scientist | $95,000 | Very Strong | SQL, Python, Tableau |\n| Digital Marketing Manager | $80,000 | Steady | SEO, analytics, automation |\n| Product Manager | $120,000 | Strong | Agile, UX, communication |\n| Cybersecurity Specialist | $115,000 | Rapid | Risk assessment, cloud security |\n| AI Prompt Engineer | $130,000 | Emerging | LLMs, NLP, creativity |\n| UX/UI Designer | $85,000 | Growing | Figma, user testing, wireframing |\n| Remote Sales Specialist | $75,000 | Stable | CRM, negotiation, lead gen |\n| Virtual Healthcare Consultant | $90,000 | Rapid | Telemedicine, patient systems |\n| Online Educator / Coach | $60,000 | Expanding | eLearning tools, course design |\n\n### **Why These Are the Top Remote Jobs for 2026**\n\nThese roles stand out for their mix of *productivity*, creativity, and longevity. Most are built for async *team* collaboration—perfect if you’re the kind of *person* who thrives outside the *office*.\n\n**Here’s what they have in common:**\n\n* High adaptability to *hybrid* and fully *remote* settings\n* Demand across global *technology* and *data companies*\n* Clear *tasks* with measurable outputs (great for deep *focus*)\n* Minimal *transportation* needs—your commute is just steps from your coffee machine\n\n### **Where Nomads Work Remotely From: City Picks**\n\nIf you’re planning to level up your *career* in one of these fields, *remote workers* are finding success (and sunshine) in a few favorite hubs:\n\n* **Lisbon, Portugal**: Tech *professionals* love the coworking scene. Try [**Second Home Lisboa**](https://share.google/A1vkrt7onw1eaUdhf) (€250/month, lush plants, community lunches).\n* **Dubai, UAE**: A rising hotspot for *remote work* in the Middle East. Check out [**AstroLabs Coworking**](https://maps.app.goo.gl/YhJZyVYXfM8uGF6T7) (AED 1,000/month, 24/7 access, networking-heavy community). The city’s fast internet and tax-free setup make it a practical choice for ambitious *professionals*.\n* **Mexico City, Mexico**: Great for creative *teams* and marketing *jobs*. Check [**Blend Station**](https://maps.app.goo.gl/9eZ3Kwzb2TeW5SKn9) (day pass €15, quiet upper floor).\n* **Barcelona, Spain**: A magnet for *data companies* and *remote work* culture. Work from [**Aticco Med**](https://maps.app.goo.gl/GtCKPZFqJqkMmipF7) (€200/month, rooftop views and good Wi-Fi).\n\nThese cities blend *focus* with local life — a coffee break can turn into a desert adventure in *Dubai*, a taco run in *Mexico City*, or a seaside siesta in *Barcelona*.\n\n[**Compare apartments with premium workstations for your next role.**](https://rentremote.com/a/furnished-apartments)\n\n## **How to Master Your Remote Job Search in 2026**\n\nIf you’re deep into your *remote job search* this year, the good news is: opportunity has never been wider. Across *industries* like *technology*, finance, marketing, and education, *remote jobs* are exploding in *demand* — not just for senior *professionals* but also for adaptable newcomers ready to *work remotely*.\n\nAccording to LinkedIn’s 2024 Future of Work Report, *remote job postings* still attract over 40% of applications globally, proving that flexible work is now a permanent fixture of the modern economy. From *small businesses* offering *contract projects* to global firms creating *hybrid jobs*, the trend is clear: *many businesses* are designing roles around *employees*, not offices.\n\n### **What Defines the Top Remote Jobs in 2026**\n\nIt’s not about paychecks anymore, the *best remote jobs* balance *productivity*, freedom, and skill expansion. They’re roles where *professionals* can *stay focused* without sacrificing creativity or connection.\n\n**Here’s what sets the top remote jobs apart:**\n\n* High *demand* across global *industries* (especially *technology* and digital services)\n* Strong *salary potential* tied to impact, not *location*\n* Career paths with real *growth* through new *projects* and upskilling\n* Built-in *flexibility* for *employees* balancing multiple *contracts*\n* Work cultures *offering flexible work* while maintaining structure for deep *focus*\n\n### **Where the Growth Is Happening**\n\nThe *remote job search* landscape is dominated by five main *industries*:\n\n* **Tech and Data**: From software engineering to data visualization, *remote* roles are abundant. Dubai and Barcelona are both rising hubs for *technology* professionals, offering top-tier coworking spaces for around €250/month.\n* **Digital Marketing & Design**: Creativity meets analytics. Many *small businesses* and startups *offering flexible work* rely on freelance *projects* to stay competitive.\n* **Finance & Fintech**: Analysts and auditors are thriving online, managing clients across borders. Hybrid setups in *Riyadh* and *Lisbon* offer *professionals* the stability of contracts with international exposure.\n* **Education & eLearning**: *Remote workers* are building global classrooms, turning digital *presence* into income.\n* **Entertainment & Media**: Writers, editors, and producers are driving *many businesses* toward remote-first *projects*.\n\n### **The Bottom Line on Remote Job Search in 2026**\n\nThe most successful *remote workers* aren’t just applying, they’re *researching* trends, building a *digital presence*, and matching their *skills* to where *demand* is highest. Whether you’re leading global *teams* or managing *projects* from a beach café, the defining factor in 2026 is simple: *productivity* without borders.\n\nYour *remote job search* is about finding a *job* and a rhythm that fits your life.\n\n## **What About Flexible Work?**\n\nBy 2026, *remote work* will be the rule, not the exception. *Companies* across every sector—from *data* analytics to digital *services*—are rethinking how they hire and how *employees* work best. The biggest shift? *Flexible work arrangements* are now baked into the structure of modern *jobs*.\n\nFor every *job seeker*, this means better balance and broader horizons. You no longer need to live in a tech capital to land a top role. *Businesses* have realized that hiring talent from anywhere keeps costs low and *workers* motivated. A 2024 Deloitte survey found that 64% of global *companies* plan to expand to *fully remote* or *hybrid jobs* through 2026, driven by performance gains and *productivity* data that speaks for itself.\n\n### **The Forces Behind the Growth of Flexible Work**\n\nSo what’s pushing this wave of *remote work* forward? It’s part technology, part mindset, and a lot of *research*-backed efficiency.\n\n**Key reasons for dominance:**\n\n* Automation and AI boosting *demand* for digital-first *positions*\n* *Companies* realizing *remote* and *hybrid jobs* reduce costs and increase talent access\n* *Industries* hiring *virtual assistants* and global freelancers for on-demand *projects*\n* Employees staying more *productive* with *control* over schedule and *communication channels*\n\n### **A Future Built on Flexibility**\n\nAs *businesses* evolve, so will how *workers* define success. The new standard career path values freedom, adaptability, and focus over fixed schedules. The *jobs* leading in 2026 are all about how well you deliver results.\n\nFlexible work has quietly become the foundation for global *growth*, creating a job market that rewards skill and self-direction over geography.\n\n## **Skills and Certifications That Will Define Remote Work in 2026**\n\nIf you’re a *job seeker* hoping to land one of the top *remote work* roles in 2026, start with skills that *employers* are already chasing. The fastest *growth* is happening in *specialized areas* like AI, *data* management, and *social media management*, where *companies* need professionals who can adapt across *industries* and thrive in *hybrid roles*.\n\n[LinkedIn’s 2025 Global Talent Report](https://business.linkedin.com/talent-solutions/global-talent-trends) shows that *remote* and *hybrid* *hiring* is 29% faster for *positions* that list at least one technical certification — proof that investing in skills pays off faster than lucking out on *company career pages*.\n\n### **Hard Skills Every Remote Professional Needs**\n\n*Remote work* in 2026 won’t reward generalists—it will reward *professionals* with targeted expertise and cross-functional *ability*. Whether you’re managing *virtual assistants* or optimizing *video* campaigns, mastering a few core tools makes you instantly more hireable.\n\n**Top hard skills for 2026:**\n\n* **AI Literacy** – Learn to use AI tools for *management*, automation, and content creation. ([Coursera’s “AI for Everyone](https://www.coursera.org/learn/ai-for-everyone)” is a good course for just €39/month)\n* **Data Analytics** – A must across *industries*. The [*Google Data Analytics Certificate*](https://www.coursera.org/professional-certificates/google-data-analytics) (€42/month) teaches how to analyze and visualize *research* results for *employers*.\n* **Cloud Computing** – [AWS Certified Cloud Practitioner](https://aws.amazon.com/certification/certified-cloud-practitioner/) (€100–€150) remains one of the top-ranked entry-level *certifications* in *technology*-focused *companies*.\n* **Remote Collaboration Tools** – As *hybrid* teams expand across *locations*, fluency in Slack, Asana, and Notion keeps *employees* efficient and connected.\n\n### **Soft Skills That Separate Good from Great**\n\nHard skills get you in the door, but soft skills keep you there. As *industries* shift toward global *hybrid* setups, *companies* want people who can communicate clearly and *stay focused* without daily supervision.\n\n**Core soft skills for 2026:**\n\n* Clear communication across time zones and *communication channels*\n* Self-management and accountability for async *projects*\n* Adaptability in *hybrid* environments where *employers* value independence as much as teamwork\n* Cultural awareness to navigate international *locations* and teams\n\n### **Recommended Certifications for Job Seekers in 2026**\n\nFor *remote professionals* who want to stand out, certifications aren’t just add-ons—they’re credibility boosters. The right course can move your résumé from “later” to “interviewed.”\n\n**Best options by role type:**\n\n* **For Marketing Roles:** [HubSpot Inbound Marketing](https://academy.hubspot.com/courses/inbound-marketing) (€0–€100, recognized by most *companies*).\n* **For Data-Focused Roles:** [Google Data Analytics](https://grow.google/) or *IBM Data Science Professional Certificate* (€42–€49/month).\n* **For Cloud or Tech Roles:** AWS Cloud Practitioner (€100) or CompTIA Cloud+ (€350).\n* **For Creative Fields:** Adobe Creative Suite or Canva Design School (free–€15/month) for *social media managers* and content creators.\n\n### **Local Tip: Learn Where You Live**\n\nMany coworking spaces now double as mini learning hubs. In *Lisbon*, **Heden Workspace** hosts digital skill workshops for €25. In *Dubai*, **AstroLabs Academy** offers cloud and data bootcamps starting at AED 2,000. And for nomads on the move, *Coursera Plus* subscriptions let you keep studying no matter your *location* or *transportation* options.\n\n### **Keep Your Skills in Motion**\n\nThe most successful *remote* *job seekers* in 2026 won’t wait for *companies* to train them—they’ll build, test, and showcase their *ability* through certifications, *projects*, and real-world application. *Employers* now look for learners, not just workers. So whether you’re mastering AI or improving your *management* skills, the best investment you can make this year is in yourself—one course, one skill, one certification at a time.\n\n## **How to Read Between the Lines of Remote Job Postings**\n\nSwitching careers into *remote work* doesn’t have to mean starting over. The trick is learning how to decode *job postings*, highlight transferable skills, and show *employers* you’re already built for *flexible work arrangements*. Across *industries*, *businesses* are hiring *employees* who can adapt quickly, manage *clients* independently, and stay consistent without an *office*.\n\nAccording to LinkedIn’s 2025 Workplace Report, remote-first *job postings* now attract 2.5 times more applicants than hybrid ones—a sign that *remote* has gone from niche to normal. That also means competition is tougher, so standing out requires both smart *research* and tangible proof that you can deliver results from anywhere.\n\n### **Steps to Pivot Smoothly Into Remote Work**\n\n**1. Audit your current skill set**  \n Start by mapping what you already know. Many *businesses* value project management, writing, or design experience even if it wasn’t gained in a *remote* setting. Look at *job postings* for *web developers*, *social media managers*, or data analysts and note what *demands* overlap with your background.\n\n**2. Upskill strategically**  \n If you’re eyeing *hybrid roles* or full *remote* *positions*, invest in short courses or certifications that show you can handle digital-first *services*. A Coursera subscription (€39/month) or a Notion workflow course (€25) can give your profile a modern edge.\n\n**3. Build a remote-ready portfolio**  \n Skip the old résumé-only approach. Create a mini-site or GitHub page where you showcase your *projects*, metrics, and case studies. For example, a *social media manager* could include campaign screenshots and engagement stats, while a *web developer* could display clean UI examples or responsive site builds.\n\n**4. Optimize your online presence**  \n Use *LinkedIn* and relevant *job boards* to demonstrate your adaptability. Post short insights about remote *industries* or share lessons from your freelance *clients*. Recruiters skim *company career pages* daily; your visibility matters.\n\n**5. Apply selectively, not endlessly**  \n Don’t mass-apply to everything. Target *businesses* offering real *benefits* and *flexible work arrangements*. If a *job posting* reads like it’s still tied to an *office*, move on—it’s better to focus on *companies* that value trust and autonomy.\n\n### **Why This Approach Works**\n\nTransitioning successfully isn’t about chasing hundreds of *job postings*—it’s about showing *employers* you already operate like a remote professional. Whether you’re managing *clients*, balancing *hybrid roles*, or testing *web projects*, demonstrating consistency and clarity puts you miles ahead of the competition.\n\nThe future of *remote work* favors people who blend structure with self-direction. Learn the tools, stay adaptable, and pick the *businesses* that see *flexibility* as a benefit, not a burden.\n\n## **Best Platforms to Find Remote Jobs in 2026**\n\nFinding your next *remote* role in 2026 isn’t about luck — it’s about smart *research* and knowing where *companies* are *hiring*. Whether you’re exploring *entry level* positions or aiming for a seasoned *hybrid* role, the online job market is now stacked with credible platforms that save you time (and sanity).\n\nMore than 70% of *employees* say they’d choose *remote* or *hybrid* *benefits* over a pay raise, according to a 2025 Buffer survey. That preference has pushed *companies* to post thousands of new *remote* *jobs* every month, across every *industry* — from AI startups to digital *services* firms.\n\n### **Top Job Boards for Remote and Entry Level Roles**\n\nIf you’re starting fresh or transitioning careers, these sites make *remote hiring* simple and reliable.\n\n**Best all-round platforms:**\n\n* [**We Work Remotely**](https://weworkremotely.com/) – A trusted favorite for *entry level* to senior roles in design, writing, and engineering. Expect transparent pay ranges and global postings.\n* [**Remote OK**](https://remoteok.com/) – Great for tracking in-demand *services* like AI, product design, or *video* production. Jobs often specify timezone overlap.\n* [**Wellfound**](https://wellfound.com/) – Perfect for startup lovers. Many listings include *benefits* like coworking stipends or home *office* allowances.\n* [**FlexJobs**](https://www.flexjobs.com/) – Curated roles (no spam). Great for parents or *employees* seeking *hybrid* setups with verified *companies*.\n\n### **Niche Boards by Profession or Industry**\n\nSometimes *entry level* applicants find better results on smaller, specialized boards.\n\n**For example:**\n\n* **Tech:** Stack Overflow, Remote Tech Jobs\n* **Marketing:** GrowthHackers Jobs, Dynamite Jobs\n* **Education:** Teach Away, OutSchool\n* **Media & Video:** Mandy Network, ProductionHUB\n* **Customer Support & Admin:** Virtual Vocations, Working Nomads\n\nEach offers unique perks — some filter by contract type, others by timezone, or whether *transportation* reimbursements or *insurance* are included.\n\n### **Remote-First Companies Worth Watching**\n\nSome *companies* have built global teams from day one and continue leading in *remote hiring*.\n\n* [**Zapier**](https://zapier.com/): Over 800 *employees*, all remote, with roles across automation, support, and content.\n* [**GitLab**](https://about.gitlab.com/jobs/all-jobs/): Offers *benefits* like equity and professional development budgets.\n* [**Deel**](https://www.deel.com/careers/): Known for international *hiring* and *insurance* coverage for remote *employees*.\n* [**Automattic**](https://automattic.com/work-with-us/): Fully distributed since before it was cool, now employing *workers* in over 70 countries.\n\n### **Local Expert Tip: Go Where the Workflows Are**\n\nOnce you’ve applied, show your remote readiness. Record a 90-second *video* intro, polish your *LinkedIn*, and tailor your résumé for global *companies* that prioritize communication and accountability. It’s not just about skills — it’s about showing you’re *responsible*, organized, and self-directed enough to thrive without an *office*.\n\n## **The Best Remote Cities to Live and Work in 2026**\n\nChoosing where to base your *remote* life is half the fun. Between affordable rent, stable *services*, and fast *transportation*, some cities just make it easier to get things done — and still enjoy yourself. The most popular hubs combine *hybrid options*, great weather, and a growing community of professionals who actually understand what working remotely feels like.\n\n### **Lisbon: Europe’s Laid-Back Remote Capital**\n\nLisbon tops almost every list for a reason. The city nails the balance between low cost of living and high-quality *services*. You can find modern coworking spaces with ergonomic chairs and ocean views, plus cafés where baristas know your laptop better than your name.\n\n**Local favorite:** **Hello, Kristof Café** (€3 cappuccino, calm vibe, excellent Wi-Fi). It’s a favorite morning spot for writers, developers, and designers before they head to coworkings like **Second Home** (€250/month).\n\n**Why remote workers love it:**\n\n* Affordable *transportation* (monthly metro pass ~€40)\n* Reliable *hybrid options* with coworking passes or day desks\n* Health *insurance* for freelancers is accessible through Portugal’s SNS system\n\n### **Barcelona: Work Meets the Mediterranean**\n\nBarcelona blends energy, culture, and sun in ways few cities can match. Digital *professionals* benefit from Spain’s new *remote* visa, which allows non-EU residents to stay and work legally for up to five years. The vibe is creative but structured — perfect for *responsible* freelancers or teams juggling *hybrid* schedules.\n\n**Local favorite:** **Nomad Coffee Lab** (€2 espresso, best early work hours). Pair that with **Aticco Med Coworking** (€200/month) and a beach walk after your last call — that’s the Barcelona routine.\n\n**Why it works:**\n\n* Strong *transportation* network with metro rides at €2.55\n* Excellent *insurance* and healthcare systems\n* Global *services* industry hiring for *remote* *professionals* year-round\n\n### **Mexico City: Latin America’s Creative Hub**\n\nMexico City has evolved into one of the best *remote* hubs in the Americas. It’s affordable, inspiring, and buzzing with opportunity across creative *professions*. Coworking spaces double as networking lounges, and most locals speak some English, making it easy for newcomers to settle in.\n\n**Local favorite:** **Blend Station Coworking** (€200/month, reliable Wi-Fi, friendly staff). Pair that with tacos from **El Califa** (€3 per taco) for an ideal workday lunch.\n\n**Why it’s great for remote workers:**\n\n* Huge range of *hybrid options* for teams and freelancers\n* Budget-friendly *transportation* (metro rides at €0.30)\n* Access to private *insurance* plans from ~€70/month\n* Fast-growing demand for creative and tech *services*\n\n### **Other Notable Cities on the Rise**\n\nIf you’re looking beyond the classics:\n\n* **Berlin, Germany** – Home to thriving *remote* startups and excellent *transportation*.\n* **Buenos Aires, Argentina** – Ideal for low-cost living and skilled creative *professionals*.\n* **Dubai, UAE** – Great for high-paying *remote* contracts, modern *services*, and tax-free income.\n\n### **Choosing Your Perfect Remote Base**\n\nThe best place to live depends on your *profession*, work hours, and priorities. Need a walkable city with solid *insurance*? Choose Lisbon. Want energy, food, and fast internet? Mexico City wins. Prefer structure with sunshine? Barcelona delivers.\n\nWherever you land, remember: the best *remote* setup is one that lets you *work responsibly*, live fully, and stay inspired — all within walking distance of a great cup of coffee.\n\n## **Remote Work Outlook: 2025 vs 2026**\n\nThe *remote work* landscape is shifting fast — what was booming in 2025 is evolving in 2026. Roles that once defined flexibility, like administrative support and data entry, are seeing reduced *demand* as automation steps in. Meanwhile, *professions* tied to AI, cybersecurity, and digital design are thriving.\n\nAccording to Statista (2024), global *demand* for AI-skilled roles has jumped **32% year-over-year**, signaling how *companies* are doubling down on tech-driven hiring. Traditional *office* roles are also blending into *hybrid* models, allowing *employees* to stay remote while engaging with teams in short, strategic bursts.\n\n**Gaining traction in 2026:**\n\n* AI & data science roles (AI Prompt Engineers, Data Analysts)\n* Product managers bridging *remote* and *hybrid* *services*\n* *Virtual assistants* and *social media managers* supporting global *businesses*\n\n**Losing traction:**\n\n* Basic admin and transcription work\n* Manual customer service *positions* replaced by AI tools\n\nAs automation grows, adaptability becomes the defining skill. The *remote* *professionals* thriving in 2026 are those who treat tech as a teammate, not competition.\n\n### **How to Stand Out for Top Remote Jobs 2026**\n\nLanding your dream *remote* *position* isn’t just about applying — it’s about presenting yourself like a pro who already knows how to *work remotely*. With competition heating up, small tweaks in presentation can make a big difference.\n\n* **Polish your résumé and portfolio**  \n   Tailor every application to reflect *remote work* readiness. Highlight skills like self-management, async *communication*, and global collaboration. Include a link to your digital portfolio — whether it’s a GitHub repo, Notion workspace, or personal website. Recruiters love tangible proof of *projects* completed independently.\n* **Network intentionally**  \n   The best *remote* *jobs* often circulate in niche online communities. Join industry Slack channels, *LinkedIn* groups, or local digital nomad meetups. For *example*, Lisbon’s **Remote Collective** runs events (€10–€15 entry) where developers, marketers, and creatives swap referrals.\n* **Prepare your setup**  \n   Test your tech before every *remote interview*. That means a quiet background, stable Wi-Fi, and solid lighting. Tools like *Krisp* (noise canceling) and *Loom* (for quick *video* intros) can help you look sharp and sound professional.\n\n**Pro tip:** Many *employers* now ask for short *video* submissions — think of it as your 60-second elevator pitch for why you’re a reliable *remote* teammate.\n\n### **Position Yourself for the Remote Future**\n\nIf 2025 proved that *remote work* is sustainable, 2026 confirms it’s unstoppable. The *industries* growing fastest — tech, design, education, and consulting — are all built for borderless collaboration. *Professionals* who keep learning, experimenting, and refining their *skills* will find no shortage of opportunity.\n\nDon’t wait for *companies* to announce openings. Build visibility through your *research*, share your work online, and connect with others shaping the *remote* world. Early preparation — from refining your portfolio to expanding your *services* — helps you tap into the most rewarding *jobs* before the rest of the *workforce* catches up.\n\nRentRemote makes that journey easier by helping *remote professionals* settle anywhere. Whether you need fast Wi-Fi in *Barcelona*, creative energy in *Riyadh*, or reliable *services* in *Mexico City*, you’ll find homes designed for *productivity* and comfort.\n\n## **FAQs**\n\n**Which remote jobs will pay the most in 2026?**  \n The highest-paying *remote jobs* in 2026 will center around tech and data. *AI prompt engineers*, *cybersecurity specialists*, and *product managers* will lead in salary potential — with average annual pay ranging between **$110,000–$130,000**. These *professions* combine technical skill with creative problem-solving, which makes them valuable across multiple *industries*.\n\n**What industries are most remote-friendly by 2026?**  \n The most *remote-friendly industries* are those that already rely on digital collaboration — like *technology*, *marketing*, *education*, and *finance*. Many *companies* in these sectors now offer *hybrid options* or fully *remote* *positions* to attract global talent. Even traditional fields such as healthcare and legal *services* are expanding virtual roles for *employees*.\n\n**How can I prepare for emerging roles like AI prompt engineer?**  \n Start by building a foundation in *data* and natural language processing. Enroll in beginner AI courses (Coursera’s *Generative AI for Everyone* is a good *example*), and practice designing effective prompts for chat-based models. Add your *projects* to GitHub or a digital portfolio to showcase applied skills. Many *employers* look for adaptability and curiosity more than formal degrees in this fast-growing niche.\n\n**Will remote work continue to grow after 2026?**  \n Yes — *research* shows no slowdown in sight. A 2025 Statista study projects that by 2030, nearly **40% of the global workforce** will operate in *remote* or *hybrid* setups. As *businesses* realize the *benefits* of distributed *teams* — lower overhead, higher *productivity*, and wider access to *talent* — *remote work* will remain a long-term fixture, not a passing trend.\n\n**What are the best websites to find remote work in 2026?**  \n The top *websites* for *remote* *job seekers* in 2026 include **We Work Remotely**, **Remote OK**, **AngelList**, and **FlexJobs** — all featuring verified *job postings* across *industries*. For creative roles, check **Working Nomads** or **Dribbble Jobs**, and for developers, **Stack Overflow Jobs**. Each site lists *remote* *positions* with clear *benefits*, pay transparency, and *hybrid options* to fit your *location* and *profession*.\n\n[Home](/ \"Home\")   [Properties](/a/furnished-apartments \"Properties\")   [Workstations](/workstations \"Workstations\")   [Chat](/chat/index \"Chat\")   [Sign in](https://rentremote.com/login \"Sign in\")\n\n ",
+              "images": []
+            },
+            {
+              "url": "https://www.huzzle.com/blog/the-state-of-remote-hiring-in-2026",
+              "title": "The State of Remote Hiring in 2026: What's Actually Happening",
+              "raw_content": "[Start Hiring](https://start.huzzle.com/)[Apply For Work](https://apply.workable.com/huzzle/)\n\n[Blog](/blog)\n\n# The State of Remote Hiring in 2026\n\n\n\nThe headlines would have you believe remote work is dying. Amazon called 350,000 employees back to their desks. JP Morgan ended remote work entirely. The US federal government issued sweeping return to office mandates.\n\nAnd yet, here we are in 2026, and the reality on the ground looks nothing like the doom and gloom would suggest.\n\n### The Numbers Tell a Different Story\n\nDespite the high profile return to office announcements, remote work has held remarkably steady. Around a quarter of jobs that can be done remotely are still fully remote, with over half operating on hybrid arrangements. US remote work rates have stabilised at around 21-23%.\n\nWhat's happening is a tale of two workplaces. Large corporations with expensive real estate commitments are pushing hard for office returns. Meanwhile, thousands of growing companies are quietly expanding their remote hiring, accessing talent pools that simply weren't available to them five years ago.\n\nThe statistics back this up. FlexJobs research shows 85% of workers now say remote work matters more than salary when evaluating a job offer. And 76% said they'd look for a new job if remote work were eliminated.\n\n### Sales Roles Are Leading the Charge\n\nFor certain roles, remote hiring is thriving. Sales development, business development, account management, and account executive positions consistently rank among the top categories for remote job postings, alongside IT, project management, and operations.\n\nThe logic is straightforward. These roles are inherently communication based. They live on calls, emails, and video meetings regardless of where someone sits. The tools are mature. The workflows are established. And the talent pool becomes dramatically deeper when you're not limited to who can commute to your office.\n\nRemote job listings in sales continue to attract significantly more applications than their office based equivalents. Companies offering flexibility are simply getting access to stronger candidates.\n\n### The Pre-Vetting Problem\n\nHere's where things get interesting. As remote hiring has grown, so has the challenge of finding good people quickly.\n\nWhen you're hiring locally, you can rely on networks, referrals, and the occasional coffee chat to get a sense of someone. When you're hiring from a global talent pool, the traditional screening process breaks down. Remote job listings attract significantly more applications than office based roles, making it harder to separate the excellent from the average.\n\nThis is driving a shift toward specialist partners who do the hard work upfront. Rather than posting a job and hoping for the best, companies are increasingly working with pre-vetted talent pools where candidates have already been assessed for skills, communication, and remote work readiness.\n\nThe numbers support this approach. Companies that can access global talent pools gain a significant competitive advantage in both speed and quality of hiring. But that speed only matters if you're hiring the right people, not just filling seats.\n\n### Where the Talent Lives\n\nThe geography of remote sales talent has broadened. Time zone alignment has become a key consideration, with companies increasingly looking at regions that overlap with US, European, and Australian business hours.\n\nCompanies are finding strong SDR and BDR talent across the US, Europe, Australia, and South Africa, each offering different advantages in terms of language skills and working hours overlap.\n\nWhat's changed is the sophistication of the hiring process. Companies now want proof of remote work experience, demonstrated communication skills, and evidence that someone can thrive without the structure of an office environment.\n\n### The RTO Pushback Creates Opportunity\n\nThere's an irony in the return to office wave that smart companies are exploiting. As major corporations push employees back to their desks, they're creating a pool of talented, experienced professionals actively looking for remote opportunities.\n\nA FlexJobs survey found 69% of workers changed or seriously considered changing career fields in the past year, with wanting more remote work options cited as a leading motivator. When someone with five years of enterprise sales experience suddenly finds themselves forced into a daily commute, they start looking. And the companies offering remote flexibility are there to catch them.\n\nThis is reshaping the competitive landscape. Smaller, more agile companies can now recruit talent that would have been out of reach three years ago, simply by offering what the big players are taking away.\n\n### What Actually Works in 2026\n\nAfter years of experimentation, some clear patterns have emerged around what makes remote sales hiring successful.\n\n**Skills based assessment matters more than CVs.** The best remote hires are identified through practical evaluation of their communication, objection handling, and prospecting abilities, not by where they went to school or which logos appear on their LinkedIn.\n\n**Specialist roles outperform generalists.** Companies are no longer hiring generic remote workers. They're hiring remote SDRs with defined outcomes, KPIs, and responsibilities that mirror what you'd expect from an in house hire.\n\n**Speed is a competitive advantage.** With hiring costs rising and the best candidates receiving multiple offers, companies that can move from first contact to signed offer in days rather than weeks are winning the talent war.\n\n**Retention requires intentionality.** The companies keeping their remote sales talent focus on clear progression paths, regular feedback, and genuine integration into team culture, not just a Slack login and a laptop.\n\nRemote hiring isn't going anywhere. The headlines about office mandates capture real decisions at real companies, but they miss the broader picture. For every Amazon forcing employees back to desks, there are dozens of growing businesses quietly building world class sales teams without geographic constraints.\n\nThe winners in 2026 have figured out how to access global talent efficiently, vet candidates effectively, and build remote teams that actually perform.\n\nFor companies looking to grow their sales function, the real challenge now is doing remote hiring well.\n\n‍\n\nAsma\n\nFebruary 4, 2026\n\n## Take a look at the latest articles from Huzzle\n\nKeep reading more about hiring top talent remotely.\n\n[View all](/blog)\n\nNo items found.\n\n[View all](/blog)\n\n## Ready to turn on the Revenue Machine?\n\nLet us know your candidate requirements, and site back while we find you the perfect match\n\n[Start Hiring](https://start.huzzle.com/)[Apply For Work](https://apply.workable.com/huzzle/)",
+              "images": []
+            }
+          ],
+          "failed_results": [],
+          "response_time": 0.01,
+          "request_id": "e50a8d91-6f23-4199-8639-837a255a8b16"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Start time": {
+      "main": [
+        [
+          {
+            "node": "Topic for monitoring",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Topic for monitoring": {
+      "main": [
+        [
+          {
+            "node": "Search Tavily",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "scope > 0.75",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search Tavily": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "scope > 0.75": {
+      "main": [
+        [
+          {
+            "node": "generates a list of sites",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "generates a list of sites": {
+      "main": [
+        [
+          {
+            "node": "Extract Tavily",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Tavily": {
+      "main": [
+        [
+          {
+            "node": "Split Out1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out1": {
+      "main": [
+        [
+          {
+            "node": "Concat content",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Concat content": {
+      "main": [
+        [
+          {
+            "node": "AI Review Generator",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Review Generator",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Review Generator": {
+      "main": [
+        [
+          {
+            "node": "AI word replacement",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI word replacement": {
+      "main": [
+        [
+          {
+            "node": "Send a post to a channel",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Topic for monitoring",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "0e8d32a6-83be-4031-af88-b070899af0ee",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "d3dcfbdbba500686daf81241f820a8867cf92f296d836e87047b54c1f1e0d98e"
+  },
+  "id": "H1OX96iZaWxxQ155",
+  "tags": []
+}
