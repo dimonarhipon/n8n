@@ -71,8 +71,8 @@
       "name": "GetInitialState",
       "credentials": {
         "redis": {
-          "id": "MDcivSjTcbJDHH5f",
-          "name": "Redis account 1"
+          "id": "{{REDIS_CREDENTIAL_ID}}",
+          "name": "{{REDIS_CREDENTIAL_NAME}}"
         }
       }
     },
@@ -347,8 +347,8 @@
       "webhookId": "7d114ff1-918c-4ab2-a2d6-55bad67b1d03",
       "credentials": {
         "telegramApi": {
-          "id": "uTzLHf6aJalJB7hS",
-          "name": "budget help"
+          "id": "{{TELEGRAM_CREDENTIAL_ID}}",
+          "name": "{{TELEGRAM_CREDENTIAL_NAME}}"
         }
       }
     },
@@ -368,8 +368,8 @@
       "name": "SetLimit",
       "credentials": {
         "redis": {
-          "id": "MDcivSjTcbJDHH5f",
-          "name": "Redis account 1"
+          "id": "{{REDIS_CREDENTIAL_ID}}",
+          "name": "{{REDIS_CREDENTIAL_NAME}}"
         }
       }
     },
@@ -378,17 +378,17 @@
         "operation": "appendOrUpdate",
         "documentId": {
           "__rl": true,
-          "value": "1664geekk7-5c4JXpCGLt5lNTfCyeJ_7vws8WSmPtt_Y",
+          "value": "{{GOOGLE_SHEET_ID}}",
           "mode": "list",
           "cachedResultName": "Budget",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1664geekk7-5c4JXpCGLt5lNTfCyeJ_7vws8WSmPtt_Y/edit?usp=drivesdk"
+          "cachedResultUrl": "{{GOOGLE_SHEET_URL}}"
         },
         "sheetName": {
           "__rl": true,
           "value": "gid=0",
           "mode": "list",
           "cachedResultName": "Users",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1664geekk7-5c4JXpCGLt5lNTfCyeJ_7vws8WSmPtt_Y/edit#gid=0"
+          "cachedResultUrl": "{{GOOGLE_SHEET_USERS_URL}}"
         },
         "columns": {
           "mappingMode": "defineBelow",
@@ -435,8 +435,8 @@
       "name": "Append or update budget",
       "credentials": {
         "googleSheetsOAuth2Api": {
-          "id": "UtxFn9dGehsuhFXA",
-          "name": "budget"
+          "id": "{{GOOGLE_SHEETS_CREDENTIAL_ID}}",
+          "name": "{{GOOGLE_SHEETS_CREDENTIAL_NAME}}"
         }
       }
     },
@@ -459,8 +459,8 @@
       "webhookId": "c98c9bda-23f1-4124-8a8b-f6a5f20dab35",
       "credentials": {
         "telegramApi": {
-          "id": "uTzLHf6aJalJB7hS",
-          "name": "budget help"
+          "id": "{{TELEGRAM_CREDENTIAL_ID}}",
+          "name": "{{TELEGRAM_CREDENTIAL_NAME}}"
         }
       }
     },
@@ -480,8 +480,8 @@
       "name": "SetBase",
       "credentials": {
         "redis": {
-          "id": "MDcivSjTcbJDHH5f",
-          "name": "Redis account 1"
+          "id": "{{REDIS_CREDENTIAL_ID}}",
+          "name": "{{REDIS_CREDENTIAL_NAME}}"
         }
       }
     },
@@ -507,9 +507,9 @@
       "parameters": {
         "model": {
           "__rl": true,
-          "value": "gpt-4.1-mini",
+          "value": "{{OPENAI_MODEL}}",
           "mode": "list",
-          "cachedResultName": "gpt-4.1-mini"
+          "cachedResultName": "{{OPENAI_MODEL_NAME}}"
         },
         "builtInTools": {},
         "options": {}
@@ -524,8 +524,8 @@
       "name": "OpenAI Chat Model",
       "credentials": {
         "openAiApi": {
-          "id": "bnA1y8AMw3lNL9YV",
-          "name": "OpenAi account"
+          "id": "{{OPENAI_CREDENTIAL_ID}}",
+          "name": "{{OPENAI_CREDENTIAL_NAME}}"
         }
       }
     },
@@ -604,17 +604,17 @@
         "operation": "append",
         "documentId": {
           "__rl": true,
-          "value": "1664geekk7-5c4JXpCGLt5lNTfCyeJ_7vws8WSmPtt_Y",
+          "value": "{{GOOGLE_SHEET_ID}}",
           "mode": "list",
           "cachedResultName": "Budget",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1664geekk7-5c4JXpCGLt5lNTfCyeJ_7vws8WSmPtt_Y/edit?usp=drivesdk"
+          "cachedResultUrl": "{{GOOGLE_SHEET_URL}}"
         },
         "sheetName": {
           "__rl": true,
-          "value": 1259775409,
+          "value": {{GOOGLE_SHEET_SPENDINGS_GID}},
           "mode": "list",
           "cachedResultName": "Spendings",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1664geekk7-5c4JXpCGLt5lNTfCyeJ_7vws8WSmPtt_Y/edit#gid=1259775409"
+          "cachedResultUrl": "{{GOOGLE_SHEET_SPENDINGS_URL}}"
         },
         "columns": {
           "mappingMode": "defineBelow",
@@ -681,8 +681,8 @@
       "name": "Append or update spending",
       "credentials": {
         "googleSheetsOAuth2Api": {
-          "id": "UtxFn9dGehsuhFXA",
-          "name": "budget"
+          "id": "{{GOOGLE_SHEETS_CREDENTIAL_ID}}",
+          "name": "{{GOOGLE_SHEETS_CREDENTIAL_NAME}}"
         }
       }
     },
@@ -690,17 +690,17 @@
       "parameters": {
         "documentId": {
           "__rl": true,
-          "value": "1664geekk7-5c4JXpCGLt5lNTfCyeJ_7vws8WSmPtt_Y",
+          "value": "{{GOOGLE_SHEET_ID}}",
           "mode": "list",
           "cachedResultName": "Budget",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1664geekk7-5c4JXpCGLt5lNTfCyeJ_7vws8WSmPtt_Y/edit?usp=drivesdk"
+          "cachedResultUrl": "{{GOOGLE_SHEET_URL}}"
         },
         "sheetName": {
           "__rl": true,
           "value": "gid=0",
           "mode": "list",
           "cachedResultName": "Users",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1664geekk7-5c4JXpCGLt5lNTfCyeJ_7vws8WSmPtt_Y/edit#gid=0"
+          "cachedResultUrl": "{{GOOGLE_SHEET_USERS_URL}}"
         },
         "filtersUI": {
           "values": [
@@ -730,8 +730,8 @@
       "name": "get budget",
       "credentials": {
         "googleSheetsOAuth2Api": {
-          "id": "UtxFn9dGehsuhFXA",
-          "name": "budget"
+          "id": "{{GOOGLE_SHEETS_CREDENTIAL_ID}}",
+          "name": "{{GOOGLE_SHEETS_CREDENTIAL_NAME}}"
         }
       }
     },
@@ -823,8 +823,8 @@
       "webhookId": "f6924594-91e9-451f-bbf7-294ed75bf504",
       "credentials": {
         "telegramApi": {
-          "id": "uTzLHf6aJalJB7hS",
-          "name": "budget help"
+          "id": "{{TELEGRAM_CREDENTIAL_ID}}",
+          "name": "{{TELEGRAM_CREDENTIAL_NAME}}"
         }
       }
     },
@@ -895,8 +895,8 @@
       "webhookId": "c00d2b88-6b3f-4952-b994-8762766d4e1d",
       "credentials": {
         "telegramApi": {
-          "id": "uTzLHf6aJalJB7hS",
-          "name": "budget help"
+          "id": "{{TELEGRAM_CREDENTIAL_ID}}",
+          "name": "{{TELEGRAM_CREDENTIAL_NAME}}"
         }
       }
     },
@@ -932,8 +932,8 @@
       "webhookId": "25ad774d-982e-482b-a40d-24e3de4e5306",
       "credentials": {
         "telegramApi": {
-          "id": "uTzLHf6aJalJB7hS",
-          "name": "budget help"
+          "id": "{{TELEGRAM_CREDENTIAL_ID}}",
+          "name": "{{TELEGRAM_CREDENTIAL_NAME}}"
         }
       }
     },
@@ -1002,17 +1002,17 @@
         "operation": "appendOrUpdate",
         "documentId": {
           "__rl": true,
-          "value": "1664geekk7-5c4JXpCGLt5lNTfCyeJ_7vws8WSmPtt_Y",
+          "value": "{{GOOGLE_SHEET_ID}}",
           "mode": "list",
           "cachedResultName": "Budget",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1664geekk7-5c4JXpCGLt5lNTfCyeJ_7vws8WSmPtt_Y/edit?usp=drivesdk"
+          "cachedResultUrl": "{{GOOGLE_SHEET_URL}}"
         },
         "sheetName": {
           "__rl": true,
-          "value": 1164614481,
+          "value": {{GOOGLE_SHEET_STATISTICS_GID}},
           "mode": "list",
           "cachedResultName": "Statistics ",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1664geekk7-5c4JXpCGLt5lNTfCyeJ_7vws8WSmPtt_Y/edit#gid=1164614481"
+          "cachedResultUrl": "{{GOOGLE_SHEET_STATISTICS_URL}}"
         },
         "columns": {
           "mappingMode": "defineBelow",
@@ -1059,8 +1059,8 @@
       "name": "Append or update row Statistics",
       "credentials": {
         "googleSheetsOAuth2Api": {
-          "id": "UtxFn9dGehsuhFXA",
-          "name": "budget"
+          "id": "{{GOOGLE_SHEETS_CREDENTIAL_ID}}",
+          "name": "{{GOOGLE_SHEETS_CREDENTIAL_NAME}}"
         }
       }
     },
@@ -1104,17 +1104,17 @@
       "parameters": {
         "documentId": {
           "__rl": true,
-          "value": "1664geekk7-5c4JXpCGLt5lNTfCyeJ_7vws8WSmPtt_Y",
+          "value": "{{GOOGLE_SHEET_ID}}",
           "mode": "list",
           "cachedResultName": "Budget",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1664geekk7-5c4JXpCGLt5lNTfCyeJ_7vws8WSmPtt_Y/edit?usp=drivesdk"
+          "cachedResultUrl": "{{GOOGLE_SHEET_URL}}"
         },
         "sheetName": {
           "__rl": true,
-          "value": 1259775409,
+          "value": {{GOOGLE_SHEET_SPENDINGS_GID}},
           "mode": "list",
           "cachedResultName": "Spendings",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1664geekk7-5c4JXpCGLt5lNTfCyeJ_7vws8WSmPtt_Y/edit#gid=1259775409"
+          "cachedResultUrl": "{{GOOGLE_SHEET_SPENDINGS_URL}}"
         },
         "filtersUI": {
           "values": [
@@ -1144,8 +1144,8 @@
       "name": "get spending2",
       "credentials": {
         "googleSheetsOAuth2Api": {
-          "id": "UtxFn9dGehsuhFXA",
-          "name": "budget"
+          "id": "{{GOOGLE_SHEETS_CREDENTIAL_ID}}",
+          "name": "{{GOOGLE_SHEETS_CREDENTIAL_NAME}}"
         }
       }
     },
@@ -1198,8 +1198,8 @@
       "webhookId": "c00d2b88-6b3f-4952-b994-8762766d4e1d",
       "credentials": {
         "telegramApi": {
-          "id": "uTzLHf6aJalJB7hS",
-          "name": "budget help"
+          "id": "{{TELEGRAM_CREDENTIAL_ID}}",
+          "name": "{{TELEGRAM_CREDENTIAL_NAME}}"
         }
       }
     },
@@ -1240,17 +1240,17 @@
       "parameters": {
         "documentId": {
           "__rl": true,
-          "value": "1664geekk7-5c4JXpCGLt5lNTfCyeJ_7vws8WSmPtt_Y",
+          "value": "{{GOOGLE_SHEET_ID}}",
           "mode": "list",
           "cachedResultName": "Budget",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1664geekk7-5c4JXpCGLt5lNTfCyeJ_7vws8WSmPtt_Y/edit?usp=drivesdk"
+          "cachedResultUrl": "{{GOOGLE_SHEET_URL}}"
         },
         "sheetName": {
           "__rl": true,
-          "value": 1164614481,
+          "value": {{GOOGLE_SHEET_STATISTICS_GID}},
           "mode": "list",
           "cachedResultName": "Statistics ",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1664geekk7-5c4JXpCGLt5lNTfCyeJ_7vws8WSmPtt_Y/edit#gid=1164614481"
+          "cachedResultUrl": "{{GOOGLE_SHEET_STATISTICS_URL}}"
         },
         "filtersUI": {
           "values": [
@@ -1272,8 +1272,8 @@
       "name": "Get Statistic",
       "credentials": {
         "googleSheetsOAuth2Api": {
-          "id": "UtxFn9dGehsuhFXA",
-          "name": "budget"
+          "id": "{{GOOGLE_SHEETS_CREDENTIAL_ID}}",
+          "name": "{{GOOGLE_SHEETS_CREDENTIAL_NAME}}"
         }
       }
     },
@@ -1281,17 +1281,17 @@
       "parameters": {
         "documentId": {
           "__rl": true,
-          "value": "1664geekk7-5c4JXpCGLt5lNTfCyeJ_7vws8WSmPtt_Y",
+          "value": "{{GOOGLE_SHEET_ID}}",
           "mode": "list",
           "cachedResultName": "Budget",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1664geekk7-5c4JXpCGLt5lNTfCyeJ_7vws8WSmPtt_Y/edit?usp=drivesdk"
+          "cachedResultUrl": "{{GOOGLE_SHEET_URL}}"
         },
         "sheetName": {
           "__rl": true,
           "value": "gid=0",
           "mode": "list",
           "cachedResultName": "Users",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1664geekk7-5c4JXpCGLt5lNTfCyeJ_7vws8WSmPtt_Y/edit#gid=0"
+          "cachedResultUrl": "{{GOOGLE_SHEET_USERS_URL}}"
         },
         "options": {}
       },
@@ -1305,8 +1305,8 @@
       "name": "Get Users",
       "credentials": {
         "googleSheetsOAuth2Api": {
-          "id": "UtxFn9dGehsuhFXA",
-          "name": "budget"
+          "id": "{{GOOGLE_SHEETS_CREDENTIAL_ID}}",
+          "name": "{{GOOGLE_SHEETS_CREDENTIAL_NAME}}"
         }
       }
     },
@@ -1328,7 +1328,7 @@
     {
       "parameters": {
         "method": "POST",
-        "url": "https://api.telegram.org/bot7811950277:AAEZpnA40v79Unq2yxGucrVyZMlBNG6SNkw/setMyCommands ",
+        "url": "https://api.telegram.org/bot{{TELEGRAM_BOT_TOKEN}}/setMyCommands",
         "sendBody": true,
         "specifyBody": "json",
         "jsonBody": "{\n  \"commands\": [\n    {\n      \"command\": \"start\",\n      \"description\": \"Запустить\"\n    },\n    {\n      \"command\": \"status\",\n      \"description\": \"Статус\"\n    },\n    {\n      \"command\": \"report\",\n      \"description\": \"Отчёт\"\n    }\n  ]\n}",
@@ -1362,8 +1362,8 @@
       "webhookId": "d2c0146a-2991-4ef4-b56f-890bc334b028",
       "credentials": {
         "telegramApi": {
-          "id": "uTzLHf6aJalJB7hS",
-          "name": "budget help"
+          "id": "{{TELEGRAM_CREDENTIAL_ID}}",
+          "name": "{{TELEGRAM_CREDENTIAL_NAME}}"
         }
       }
     },
@@ -1371,17 +1371,17 @@
       "parameters": {
         "documentId": {
           "__rl": true,
-          "value": "1664geekk7-5c4JXpCGLt5lNTfCyeJ_7vws8WSmPtt_Y",
+          "value": "{{GOOGLE_SHEET_ID}}",
           "mode": "list",
           "cachedResultName": "Budget",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1664geekk7-5c4JXpCGLt5lNTfCyeJ_7vws8WSmPtt_Y/edit?usp=drivesdk"
+          "cachedResultUrl": "{{GOOGLE_SHEET_URL}}"
         },
         "sheetName": {
           "__rl": true,
-          "value": 1259775409,
+          "value": {{GOOGLE_SHEET_SPENDINGS_GID}},
           "mode": "list",
           "cachedResultName": "Spendings",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1664geekk7-5c4JXpCGLt5lNTfCyeJ_7vws8WSmPtt_Y/edit#gid=1259775409"
+          "cachedResultUrl": "{{GOOGLE_SHEET_SPENDINGS_URL}}"
         },
         "filtersUI": {
           "values": [
@@ -1411,8 +1411,8 @@
       "name": "get spending for status",
       "credentials": {
         "googleSheetsOAuth2Api": {
-          "id": "UtxFn9dGehsuhFXA",
-          "name": "budget"
+          "id": "{{GOOGLE_SHEETS_CREDENTIAL_ID}}",
+          "name": "{{GOOGLE_SHEETS_CREDENTIAL_NAME}}"
         }
       }
     },
@@ -1420,17 +1420,17 @@
       "parameters": {
         "documentId": {
           "__rl": true,
-          "value": "1664geekk7-5c4JXpCGLt5lNTfCyeJ_7vws8WSmPtt_Y",
+          "value": "{{GOOGLE_SHEET_ID}}",
           "mode": "list",
           "cachedResultName": "Budget",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1664geekk7-5c4JXpCGLt5lNTfCyeJ_7vws8WSmPtt_Y/edit?usp=drivesdk"
+          "cachedResultUrl": "{{GOOGLE_SHEET_URL}}"
         },
         "sheetName": {
           "__rl": true,
-          "value": 1259775409,
+          "value": {{GOOGLE_SHEET_SPENDINGS_GID}},
           "mode": "list",
           "cachedResultName": "Spendings",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1664geekk7-5c4JXpCGLt5lNTfCyeJ_7vws8WSmPtt_Y/edit#gid=1259775409"
+          "cachedResultUrl": "{{GOOGLE_SHEET_SPENDINGS_URL}}"
         },
         "filtersUI": {
           "values": [
@@ -1460,8 +1460,8 @@
       "name": "get spending for report",
       "credentials": {
         "googleSheetsOAuth2Api": {
-          "id": "UtxFn9dGehsuhFXA",
-          "name": "budget"
+          "id": "{{GOOGLE_SHEETS_CREDENTIAL_ID}}",
+          "name": "{{GOOGLE_SHEETS_CREDENTIAL_NAME}}"
         }
       }
     },
@@ -1967,7 +1967,7 @@
   "versionId": "73c55297-c51a-47af-ae94-f4fd8cbabfa1",
   "meta": {
     "templateCredsSetupCompleted": true,
-    "instanceId": "d3dcfbdbba500686daf81241f820a8867cf92f296d836e87047b54c1f1e0d98e"
+    "instanceId": "{{N8N_INSTANCE_ID}}"
   },
   "id": "SSEGzYXhuuoZvwDO",
   "tags": []
